@@ -1,0 +1,6 @@
+/assets
+results*
+/gostim2
+/gostim2-gui
+.gostim2_cache
+test-getticks*

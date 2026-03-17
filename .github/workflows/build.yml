@@ -1,0 +1,255 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            artifact_os: linux
+            artifact_arch: x86_64
+          - goos: windows
+            goarch: amd64
+            artifact_os: windows
+            artifact_arch: x86_64
+            extension: .exe
+          - goos: windows
+            goarch: arm64
+            artifact_os: windows
+            artifact_arch: arm64
+            extension: .exe
+          - goos: darwin
+            goarch: amd64
+            artifact_os: macos
+            artifact_arch: x86_64
+          - goos: darwin
+            goarch: arm64
+            artifact_os: macos
+            artifact_arch: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
+
+      - name: Build
+        run: |
+          mkdir -p dist
+          VERSION=$(git describe --tags --always 2>/dev/null || echo "0.0.0-dev")
+          COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          LDFLAGS="-X 'gostim2/internal/version.Version=$VERSION' -X 'gostim2/internal/version.GitCommit=$COMMIT' -X 'gostim2/internal/version.BuildTime=$BUILD_TIME'"
+          
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o dist/gostim2${{ matrix.extension }} ./cmd/gostim2
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o dist/gostim2-gui${{ matrix.extension }} ./cmd/gostim2-gui
+
+          ARCHIVE_NAME=gostim2-$VERSION-${{ matrix.artifact_os }}-${{ matrix.artifact_arch }}-binary
+          mkdir -p $ARCHIVE_NAME
+          cp dist/gostim2${{ matrix.extension }} $ARCHIVE_NAME/
+          cp dist/gostim2-gui${{ matrix.extension }} $ARCHIVE_NAME/
+          cp README.md $ARCHIVE_NAME/README.txt 2>/dev/null || true
+          cp experiment.csv $ARCHIVE_NAME/ 2>/dev/null || true
+          if [ -d "assets" ]; then cp -r assets $ARCHIVE_NAME/; fi
+          
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            zip -r $ARCHIVE_NAME.zip $ARCHIVE_NAME
+          else
+            tar -czvf $ARCHIVE_NAME.tar.gz $ARCHIVE_NAME
+          fi
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bin-${{ matrix.artifact_os }}-${{ matrix.artifact_arch }}
+          path: gostim2-*
+
+  package-linux:
+    name: Package Linux (${{ matrix.arch }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            deb_arch: amd64
+            appimage_arch: x86_64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y desktop-file-utils file
+      - name: Download Linux Binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: bin-linux-${{ matrix.arch }}
+          path: build_tmp
+      - name: Create Linux Packages
+        run: |
+          # 1. Versioning
+          RAW_VERSION=$(git describe --tags --always 2>/dev/null || echo "0.0.0")
+          if [[ $RAW_VERSION =~ ^v?[0-9] ]]; then
+            VERSION=${RAW_VERSION#v}
+          else
+            VERSION="0.0.0-$RAW_VERSION"
+          fi
+          bin_dir=$(find build_tmp -maxdepth 1 -type d -name "gostim2-*" | head -n 1)
+          
+          # 2. .deb package
+          mkdir -p deb/usr/local/bin deb/usr/share/applications deb/usr/share/pixmaps deb/DEBIAN
+          cp "$bin_dir"/gostim2* deb/usr/local/bin/
+          chmod +x deb/usr/local/bin/gostim2*
+          cp gostim2.desktop deb/usr/share/applications/
+          cp gui.png deb/usr/share/pixmaps/gostim2.png
+          cat <<EOF > deb/DEBIAN/control
+          Package: gostim2
+          Version: ${VERSION}
+          Architecture: ${{ matrix.deb_arch }}
+          Maintainer: Christophe Pallier <christophe@pallier.org>
+          Description: Multimedia stimulus delivery system for neuroscience and psychology.
+          EOF
+          dpkg-deb --build deb gostim2_${VERSION}_${{ matrix.deb_arch }}.deb
+
+          # 3. AppImage preparation
+          mkdir -p AppDir/usr/bin
+          cp "$bin_dir"/gostim2* AppDir/usr/bin/
+          chmod +x AppDir/usr/bin/gostim2*
+          cp gostim2.desktop AppDir/
+          cp gui.png AppDir/gostim2.png
+          
+          # Verify binary architecture
+          file AppDir/usr/bin/gostim2-gui
+
+          cat <<'EOF' > AppDir/AppRun
+          #!/bin/sh
+          SELF=$(readlink -f "$0")
+          HERE=${SELF%/*}
+          export PATH="${HERE}/usr/bin/:${PATH}"
+          exec "${HERE}/usr/bin/gostim2-gui" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+          
+          # Download and extract appimagetool
+          curl -LO https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+          ./appimagetool-x86_64.AppImage --appimage-extract
+          
+          # Run the extracted tool with ARCH environment variable prefixed directly
+          # Using -n to skip AppStream check (common in cross-arch builds)
+          # We use the extracted AppRun to ensure the environment is set up correctly for the tool itself
+          echo "Packaging for ARCH: ${{ matrix.appimage_arch }}"
+          ARCH=${{ matrix.appimage_arch }} ./squashfs-root/AppRun -n AppDir gostim2-${{ matrix.arch }}.AppImage
+      - name: Upload Linux Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-linux-${{ matrix.arch }}
+          path: |
+            *.deb
+            gostim2-*.AppImage
+
+  package-windows:
+    name: Package Windows (x86_64)
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download Windows x86_64 Binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: bin-windows-x86_64
+          path: build_tmp
+      - name: Install NSIS
+        run: choco install nsis -y
+      - name: Create Installer
+        shell: pwsh
+        run: |
+          $bin_dir = Get-ChildItem -Path build_tmp -Directory | Where-Object { $_.Name -like "gostim2-*" } | Select-Object -First 1
+          Copy-Item "$($bin_dir.FullName)\*" . -Recurse -Force
+          & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-windows
+          path: gostim2-setup.exe
+
+  package-macos:
+    name: Package macOS (Universal/arm64)
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download macOS arm64 Binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: bin-macos-arm64
+          path: build_tmp
+      - name: Create DMG
+        run: |
+          brew install create-dmg
+          mkdir -p dist_dmg
+          bin_dir=$(find build_tmp -maxdepth 1 -type d -name "gostim2-*" | head -n 1)
+          cp -r "$bin_dir"/* dist_dmg/
+          chmod +x dist_dmg/gostim2*
+          create-dmg \
+            --volname "gostim2-go" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "gostim2-gui" 200 190 \
+            --hide-extension "gostim2-gui" \
+            --app-drop-link 600 185 \
+            "gostim2-macos-installer.dmg" \
+            "dist_dmg/"
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-macos
+          path: gostim2-macos-installer.dmg
+
+  release:
+    name: Create Release
+    needs: [build, package-windows, package-macos, package-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release_artifacts
+          merge-multiple: true
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release_artifacts/gostim2-*.zip
+            release_artifacts/gostim2-*.tar.gz
+            release_artifacts/gostim2-setup.exe
+            release_artifacts/gostim2-macos-installer.dmg
+            release_artifacts/*.deb
+            release_artifacts/*.AppImage
+          generate_release_notes: true
