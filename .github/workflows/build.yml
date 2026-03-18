@@ -180,12 +180,17 @@ jobs:
         with:
           name: bin-windows-x86_64
           path: build_tmp
-      - name: Setup NSIS
-        uses: joncloud/setup-nsis@v1
+      - name: Install NSIS
+        uses: iisidors/install-nsis@v1
       - name: Create Installer
         shell: pwsh
         run: |
           $bin_dir = Get-ChildItem -Path build_tmp -Directory | Where-Object { $_.Name -like "gostim2-*" } | Select-Object -First 1
+          if (-not $bin_dir) {
+             Write-Error "Could not find binary directory in build_tmp"
+             exit 1
+          }
+          Write-Host "Copying files from $($bin_dir.FullName) to current directory"
           Copy-Item "$($bin_dir.FullName)\*" . -Recurse -Force
           
           # Try to find makensis in PATH, otherwise use common default locations
@@ -193,7 +198,8 @@ jobs:
           if (-not $makensis) {
             $paths = @(
               "C:\Program Files (x86)\NSIS\makensis.exe",
-              "C:\Program Files\NSIS\makensis.exe"
+              "C:\Program Files\NSIS\Bin\makensis.exe",
+              "C:\Program Files (x86)\NSIS\Bin\makensis.exe"
             )
             foreach ($p in $paths) {
               if (Test-Path $p) {
@@ -205,6 +211,8 @@ jobs:
           
           if (-not $makensis) {
             Write-Error "makensis.exe not found in PATH or standard locations."
+            # List some directories to help debugging if it fails again
+            dir "C:\Program Files (x86)" -ErrorAction SilentlyContinue
             exit 1
           }
           
