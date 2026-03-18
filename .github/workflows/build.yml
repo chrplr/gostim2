@@ -180,12 +180,25 @@ jobs:
         with:
           name: bin-windows-x86_64
           path: build_tmp
+      - name: Install NSIS
+        run: |
+          $success = $false
+          for ($i = 1; $i -le 3; $i++) {
+            choco install nsis -y --no-progress
+            if ($LASTEXITCODE -eq 0) {
+              $success = $true
+              break
+            }
+            Write-Host "Choco install failed, retrying in 15 seconds..."
+            Start-Sleep -Seconds 15
+          }
+          if (-not $success) { exit 1 }
       - name: Create Installer
         shell: pwsh
         run: |
           $bin_dir = Get-ChildItem -Path build_tmp -Directory | Where-Object { $_.Name -like "gostim2-*" } | Select-Object -First 1
           Copy-Item "$($bin_dir.FullName)\*" . -Recurse -Force
-          & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
+          makensis installer.nsi
       - name: Upload Windows Installer
         uses: actions/upload-artifact@v4
         with:
