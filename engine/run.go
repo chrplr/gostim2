@@ -17,20 +17,20 @@ func Run(cfg *Config) (string, error) {
 		return "", fmt.Errorf("CSV file is required")
 	}
 
-	windowFlags := sdl.WINDOW_RESIZABLE
-	if cfg.Fullscreen || cfg.AutodetectRes {
-		windowFlags |= sdl.WINDOW_FULLSCREEN
-	}
-
+	// Resolve screen resolution first (autodetect reads display info)
 	if cfg.AutodetectRes {
 		displays, err := sdl.GetDisplays()
 		if err == nil && cfg.DisplayIndex >= 0 && cfg.DisplayIndex < len(displays) {
-			display := displays[cfg.DisplayIndex]
-			if dm, err := display.DesktopDisplayMode(); err == nil {
+			if dm, err := displays[cfg.DisplayIndex].DesktopDisplayMode(); err == nil {
 				cfg.ScreenWidth = int(dm.W)
 				cfg.ScreenHeight = int(dm.H)
 			}
 		}
+	}
+
+	windowFlags := sdl.WINDOW_RESIZABLE
+	if cfg.WindowMode > 0 {
+		windowFlags |= sdl.WINDOW_FULLSCREEN
 	}
 
 	window, renderer, err := sdl.CreateWindowAndRenderer("gostim2 (Go)", cfg.ScreenWidth, cfg.ScreenHeight, windowFlags)
@@ -40,20 +40,27 @@ func Run(cfg *Config) (string, error) {
 	defer window.Destroy()
 	defer renderer.Destroy()
 
-	if cfg.AutodetectRes {
+	switch cfg.WindowMode {
+	case 1: // Fullscreen desktop (borderless)
+		if err := window.SetFullscreenMode(nil); err != nil {
+			fmt.Printf("Warning: Failed to set fullscreen desktop mode: %v\n", err)
+		}
+		if (window.Flags() & sdl.WINDOW_FULLSCREEN) == 0 {
+			if err := window.SetFullscreen(true); err != nil {
+				fmt.Printf("Warning: Failed to set fullscreen: %v\n", err)
+			}
+		}
+	case 2: // Fullscreen exclusive
 		display := sdl.GetDisplayForWindow(window)
 		if desktopMode, err := display.DesktopDisplayMode(); err == nil {
 			if err := window.SetFullscreenMode(desktopMode); err != nil {
-				fmt.Printf("Warning: Failed to set fullscreen mode: %v\n", err)
+				fmt.Printf("Warning: Failed to set exclusive fullscreen mode: %v\n", err)
 			}
-			// Only call SetFullscreen(true) if the window is not already in fullscreen mode
-			// (On macOS, sdl.WINDOW_FULLSCREEN in initial flags might already set it)
-			if (window.Flags() & sdl.WINDOW_FULLSCREEN) == 0 {
-				if err := window.SetFullscreen(true); err != nil {
-					fmt.Printf("Warning: Failed to set fullscreen: %v\n", err)
-				}
+		}
+		if (window.Flags() & sdl.WINDOW_FULLSCREEN) == 0 {
+			if err := window.SetFullscreen(true); err != nil {
+				fmt.Printf("Warning: Failed to set fullscreen: %v\n", err)
 			}
-			cfg.Fullscreen = true
 		}
 	}
 
@@ -72,16 +79,11 @@ func Run(cfg *Config) (string, error) {
 		}
 	}
 
-	// If no font loaded yet (either none specified or loading failed), try default
+	// If no font loaded yet (either none specified or loading failed), use embedded default
 	if font == nil {
-		fontPath := GetDefaultFontPath()
-		if fontPath != "" {
-			font, err = ttf.OpenFont(fontPath, float32(cfg.FontSize))
-			if err != nil {
-				fmt.Printf("Failed to load default font: %s (%v)\n", fontPath, err)
-			} else {
-				cfg.FontFile = fontPath
-			}
+		font, err = OpenDefaultFont(float32(cfg.FontSize))
+		if err != nil {
+			fmt.Printf("Failed to load embedded default font: %v\n", err)
 		}
 	}
 	defer func() {
@@ -193,12 +195,12 @@ func Run(cfg *Config) (string, error) {
 		CommandLine:       strings.Join(os.Args, " "),
 	}
 
-	if !DisplaySplash(renderer, cfg.StartSplash, cfg.ScreenWidth, cfg.ScreenHeight, cfg.ScaleFactor, cfg.BGColor) {
+	if !DisplaySplash(renderer, cfg.StartSplash, cfg.ScaleFactor, cfg.BGColor) {
 		return "", nil
 	}
 
 	if !cfg.SkipWait {
-		if !WaitForKeyPress(renderer, font, cfg.ScreenWidth, cfg.ScreenHeight, cfg.TextColor, cfg.BGColor) {
+		if !WaitForKeyPress(renderer, font, cfg.TextColor, cfg.BGColor) {
 			return "", nil
 		}
 	}
@@ -209,7 +211,7 @@ func Run(cfg *Config) (string, error) {
 
 	if success {
 		log.Completed = true
-		DisplaySplash(renderer, cfg.EndSplash, cfg.ScreenWidth, cfg.ScreenHeight, cfg.ScaleFactor, cfg.BGColor)
+		DisplaySplash(renderer, cfg.EndSplash, cfg.ScaleFactor, cfg.BGColor)
 	}
 
 	log.EndTime = time.Now().Format("2006-01-02 15:04:05.000")

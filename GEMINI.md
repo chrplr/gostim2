@@ -22,8 +22,16 @@ Precision is the primary technical goal of Gostim2.
 - **VRR Mode**: When `-vrr` is enabled, VSYNC is disabled, and the engine uses a busy-wait loop (`vrrWaitNS` = 2ms) to hit timestamps with sub-millisecond accuracy.
 
 ### Resolution & Scaling
-- **Autodetect Mode**: Uses "Exclusive Fullscreen" to bypass the desktop compositor, which is critical for preventing frame drops and minimizing input lag.
+- **Autodetect Resolution**: Sets `cfg.ScreenWidth/ScreenHeight` from `SDL_GetDesktopDisplayMode()` (screen coordinates, not physical pixels). This is independent of the window mode.
 - **Scale Factor**: All visual stimuli are scaled by `cfg.ScaleFactor`. This allows running the same experiment on different monitors while maintaining relative stimulus size.
+
+### Window Modes (`cfg.WindowMode`)
+Three modes are available, stored as an integer in config (`window_mode`):
+- **0 — Windowed**: A standard resizable window at the configured resolution.
+- **1 — Fullscreen Desktop** (`SDL_WINDOW_FULLSCREEN` + `SetFullscreenMode(nil)`): Borderless fullscreen at the desktop resolution. The compositor stays active; no mode switch. Safest option for multi-monitor setups.
+- **2 — Fullscreen Exclusive** (`SDL_WINDOW_FULLSCREEN` + `SetFullscreenMode(&desktopMode)`): Exclusive ownership of the display. Bypasses the OS compositor, which minimises latency and prevents frame drops. Most relevant for EEG/MEG/fMRI where timing is critical. Can crash on some systems if the display mode negotiation fails.
+
+**Important SDL3 coordinate system note**: SDL3 renders in *physical pixel space*. `DesktopDisplayMode()` returns screen coordinates (logical points), which differ from physical pixels on HiDPI/Retina displays. All centering calculations therefore query `renderer.CurrentOutputSize()` at draw time rather than using `cfg.ScreenWidth/ScreenHeight`, ensuring correct centering in all modes and display densities.
 
 ## 📦 Dependencies & Hidden Requirements
 

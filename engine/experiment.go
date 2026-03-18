@@ -134,7 +134,7 @@ func (l *EventLog) Save(path string) error {
 	return w.Error()
 }
 
-func DisplaySplash(renderer *sdl.Renderer, filePath string, screenW, screenH int, scaleFactor float32, bgColor sdl.Color) bool {
+func DisplaySplash(renderer *sdl.Renderer, filePath string, scaleFactor float32, bgColor sdl.Color) bool {
 	if filePath == "" {
 		return true
 	}
@@ -144,10 +144,11 @@ func DisplaySplash(renderer *sdl.Renderer, filePath string, screenW, screenH int
 	}
 	defer tex.Destroy()
 
+	outW, outH, _ := renderer.CurrentOutputSize()
 	tw, th, _ := tex.Size()
 	dst := sdl.FRect{
-		X: (float32(screenW) - tw*scaleFactor) / 2.0,
-		Y: (float32(screenH) - th*scaleFactor) / 2.0,
+		X: (float32(outW) - tw*scaleFactor) / 2.0,
+		Y: (float32(outH) - th*scaleFactor) / 2.0,
 		W: tw * scaleFactor,
 		H: th * scaleFactor,
 	}
@@ -172,7 +173,7 @@ func DisplaySplash(renderer *sdl.Renderer, filePath string, screenW, screenH int
 	return true
 }
 
-func WaitForKeyPress(renderer *sdl.Renderer, font *ttf.Font, screenW, screenH int, textColor, bgColor sdl.Color) bool {
+func WaitForKeyPress(renderer *sdl.Renderer, font *ttf.Font, textColor, bgColor sdl.Color) bool {
 	if font == nil {
 		return true
 	}
@@ -189,9 +190,10 @@ func WaitForKeyPress(renderer *sdl.Renderer, font *ttf.Font, screenW, screenH in
 	}
 	defer tex.Destroy()
 
+	outW, outH, _ := renderer.CurrentOutputSize()
 	dst := sdl.FRect{
-		X: (float32(screenW) - float32(surf.W)) / 2.0,
-		Y: (float32(screenH) - float32(surf.H)) / 2.0,
+		X: (float32(outW) - float32(surf.W)) / 2.0,
+		Y: (float32(outH) - float32(surf.H)) / 2.0,
 		W: float32(surf.W),
 		H: float32(surf.H),
 	}
@@ -218,11 +220,15 @@ func WaitForKeyPress(renderer *sdl.Renderer, font *ttf.Font, screenW, screenH in
 
 const CrossSize = 20
 
-func drawFixationCross(renderer *sdl.Renderer, w, h int, color sdl.Color) {
+func drawFixationCross(renderer *sdl.Renderer, color sdl.Color) {
 	renderer.SetDrawColor(color.R, color.G, color.B, color.A)
+	w, h, _ := renderer.CurrentOutputSize()
 	mx, my := float32(w)/2, float32(h)/2
+	// Two parallel lines per arm for 2-pixel thickness
 	renderer.RenderLine(mx-CrossSize, my, mx+CrossSize, my)
+	renderer.RenderLine(mx-CrossSize, my+1, mx+CrossSize, my+1)
 	renderer.RenderLine(mx, my-CrossSize, mx, my+CrossSize)
+	renderer.RenderLine(mx+1, my-CrossSize, mx+1, my+CrossSize)
 }
 
 const (
@@ -492,18 +498,22 @@ func (s *experimentState) render() {
 		}
 
 		if tex != nil && !showBlank {
+			outW, outH, _ := s.renderer.CurrentOutputSize()
 			dr := sdl.FRect{
-				X: (float32(s.cfg.ScreenWidth) - (w * s.cfg.ScaleFactor)) / 2.0,
-				Y: (float32(s.cfg.ScreenHeight) - (h * s.cfg.ScaleFactor)) / 2.0,
+				X: (float32(outW) - (w * s.cfg.ScaleFactor)) / 2.0,
+				Y: (float32(outH) - (h * s.cfg.ScaleFactor)) / 2.0,
 				W: w * s.cfg.ScaleFactor,
 				H: h * s.cfg.ScaleFactor,
 			}
 			s.renderer.RenderTexture(tex, nil, &dr)
-		} else if showBlank || (s.activeVisual != -1 && s.cfg.UseFixation) {
-			drawFixationCross(s.renderer, s.cfg.ScreenWidth, s.cfg.ScreenHeight, s.cfg.FixationColor)
+			if s.cfg.FixationMode == 2 {
+				drawFixationCross(s.renderer, s.cfg.FixationColor)
+			}
+		} else if s.cfg.FixationMode >= 1 {
+			drawFixationCross(s.renderer, s.cfg.FixationColor)
 		}
-	} else if s.cfg.UseFixation {
-		drawFixationCross(s.renderer, s.cfg.ScreenWidth, s.cfg.ScreenHeight, s.cfg.FixationColor)
+	} else if s.cfg.FixationMode >= 1 {
+		drawFixationCross(s.renderer, s.cfg.FixationColor)
 	}
 	s.renderer.Present()
 }

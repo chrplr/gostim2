@@ -44,13 +44,20 @@ There are two apps: a command line one (`gostim2`) and a graphical one (`gostim2
 1. **Launch the GUI**: Run `./gostim2-gui`.
 2. **Configure**:
    - Click **"..."** next to **Experiment CSV** and select the csv file in `examples/Visual_Categories_Localizer_Minye_Zhan_(demo)`.
-   - The **Stimuli Directory** is detected automatically if a `stimuli/` or `assets/` folder exists next to the CSV file. You can also set it manually.
+   - The stimuli directory is detected automatically: the program searches for a `stimuli/` or `assets/` subfolder next to the CSV file.
 3. **Start**: Click the green **START** button. 
 4. **Interact**: Press any key when the "Press any key to start" message appears.
 5. **Exit**: Press **Escape** at any time to interrupt the experiment.
 
 ### GUI Mode
-The GUI provides an interactive setup window to configure file paths, resolution, and experimental options (like fixation cross and fullscreen). It includes an **Autodetect (Exclusive Fullscreen)** option to automatically match your monitor's native resolution and bypass the desktop compositor. Settings are automatically cached for the next session.
+The GUI provides an interactive setup window to configure file paths, resolution, and experimental options. Settings are automatically cached for the next session.
+
+**Resolution**: Choose a fixed resolution from the list, or check **Autodetect resolution** to use your monitor's native resolution automatically. This setting is independent of the window mode.
+
+**Window mode** (three mutually exclusive options):
+- **Windowed** — standard window at the chosen resolution.
+- **Fullscreen Desktop** — borderless fullscreen at the desktop resolution, with the OS compositor still active. The safest option; recommended for everyday use.
+- **Fullscreen (exclusive)** — takes exclusive control of the display and bypasses the OS compositor. Minimises latency and prevents compositor-induced frame drops. Recommended for EEG/MEG/fMRI recordings. Note: this mode can crash on some systems or configurations.
 
 ### CLI Mode
 For automated or console-only environments:
@@ -61,9 +68,10 @@ For automated or console-only environments:
 - `-csv` / `-tsv`: Path to the stimulus CSV or TSV file (required).
 - `-results-dir`: Directory where result files are saved (default: `gostim2-results`). **Note**: If a relative path is provided, it is resolved relative to the directory of the CSV file.
 - `-stimuli-dir` / `-assets`: Directory containing image and sound assets. If omitted, the program automatically searches for a `stimuli/` or `assets/` folder in the same directory as the CSV file.
-- `-res`: Screen resolution (e.g., `1920x1080` or `Autodetect` for native exclusive fullscreen).
+- `-res`: Screen resolution (e.g., `1920x1080` or `Autodetect` to use the native resolution).
 - `-font`: Path to a TTF font file.
-- `-fullscreen`: Run in fullscreen mode.
+- `-fullscreen`: Run in exclusive fullscreen mode (bypasses OS compositor).
+- `-fullscreen-desktop`: Run in fullscreen desktop mode (borderless, compositor active).
 - `-display`: Index of the display to use (default: `0`).
 - `-dlp`: Serial device path for DLP-IO8-G triggers (e.g., `/dev/ttyUSB0`).
 
@@ -120,7 +128,7 @@ onset_time,duration,type,stimuli
 ## Features
 
 - **Precise Timing:** High-resolution timing loop with VSYNC synchronization and predictive onset look-ahead.
-- **Exclusive Fullscreen:** Support for native resolution "Exclusive" mode (bypassing the OS compositor) for minimal latency and flicker-free onset.
+- **Flexible Fullscreen:** Three window modes — Windowed, Fullscreen Desktop (borderless), and Fullscreen Exclusive (bypasses OS compositor for minimal latency). Resolution autodetection is independent of the chosen mode.
 - **Low-Latency Audio:** Uses a custom software mixer to minimize startup delay and ensure thread-safety.
 - **Text Stimuli:** Support for rendering text via TTF fonts.
 - **Unified Event Log:** Records stimulus onsets, offsets, and user responses in a single CSV file with a comprehensive metadata header.

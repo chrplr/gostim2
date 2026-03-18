@@ -61,16 +61,6 @@ func main() {
 	cfg.LoadCache()
 	cfg.SubjectID = "" // Always start with empty subject ID field
 
-	// Default stimuli dir if empty — check CWD as a convenience before any CSV is selected
-	if cfg.StimuliDir == "" {
-		for _, candidate := range []string{"stimuli", "assets"} {
-			if info, err := os.Stat(candidate); err == nil && info.IsDir() {
-				cfg.StimuliDir = candidate
-				break
-			}
-		}
-	}
-
 	for {
 		if engine.RunGuiSetup(cfg) {
 			_, err := engine.Run(cfg)

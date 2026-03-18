@@ -14,18 +14,18 @@ import (
 )
 
 
-func getTargetField(focusBox int, cfg *Config, configFilePath, displayStr, fontSizeStr *string) *string {
+func getTargetField(focusBox int, cfg *Config, configFilePath, displayStr, fontSizeStr, fixColorEditStr *string) *string {
 	switch focusBox {
 	case 0: return configFilePath
 	case 1: return &cfg.SubjectID
 	case 2: return &cfg.CSVFile
-	case 3: return &cfg.StimuliDir
-	case 4: return &cfg.StartSplash
-	case 5: return &cfg.FontFile
-	case 6: return &cfg.ResultsDir
-	case 7: return &cfg.DLPDevice
-	case 8: return displayStr
-	case 9: return fontSizeStr
+	case 3: return &cfg.StartSplash
+	case 4: return &cfg.FontFile
+	case 5: return &cfg.ResultsDir
+	case 6: return &cfg.DLPDevice
+	case 7: return displayStr
+	case 8: return fontSizeStr
+	case 9: return fixColorEditStr
 	default: return nil
 	}
 }
@@ -428,6 +428,7 @@ func RunGuiSetup(cfg *Config) bool {
 	configFilePath := ""
 	displayStr := strconv.Itoa(cfg.DisplayIndex)
 	fontSizeStr := strconv.Itoa(cfg.FontSize)
+	fixColorEditStr := fmt.Sprintf("%d,%d,%d,%d", cfg.FixationColor.R, cfg.FixationColor.G, cfg.FixationColor.B, cfg.FixationColor.A)
 
 	focusBox := -1
 
@@ -459,18 +460,19 @@ func RunGuiSetup(cfg *Config) bool {
 	defer window.StopTextInput()
 
 	const (
-		C1X           = 30
-		C2X           = 450
-		BoxW          = 350
-		BoxH          = 30
-		RowSpacing    = 60
-		BrowseX       = 390
-		BrowseW       = 35
-		ResStartYS    = 240
-		CheckSize     = 20
-		CheckSpacing  = 30
-		OptionsY      = 460
-		StartBtnY     = 720
+		C1X          = 30
+		C2X          = 450
+		BoxW         = 350
+		BoxH         = 30
+		RowSpacing   = 60
+		BrowseX      = 390
+		BrowseW      = 35
+		CheckSize    = 20
+		CheckSpacing = 30
+		WinModeY     = 55  // col2: first window-mode radio (label at WinModeY-25)
+		ResStartYS   = 200 // col2: first resolution radio (label at ResStartYS-25)
+		OptionsY     = 440 // col2: first option checkbox
+		StartBtnY    = 720
 	)
 
 	for {
@@ -484,20 +486,11 @@ func RunGuiSetup(cfg *Config) bool {
 				mx, my := me.X, me.Y
 
 				focusBox = -1
-				for i := 0; i < 7; i++ {
+				for i := 0; i < 10; i++ {
 					by := float32(40 + i*RowSpacing)
 					if mx >= C1X && mx <= C1X+BoxW && my >= by && my <= by+BoxH {
 						focusBox = i
 						break
-					}
-				}
-				if focusBox == -1 {
-					for i := 0; i < 3; i++ {
-						by := float32(40 + i*RowSpacing)
-						if mx >= C2X && mx <= C2X+BoxW && my >= by && my <= by+BoxH {
-							focusBox = 7 + i
-							break
-						}
 					}
 				}
 
@@ -506,7 +499,7 @@ func RunGuiSetup(cfg *Config) bool {
 				}
 
 				if mx >= BrowseX && mx <= BrowseX+BrowseW {
-					for i := 0; i < 7; i++ {
+					for i := 0; i < 10; i++ {
 						by := float32(40 + i*RowSpacing)
 						if my >= by && my <= by+BoxH {
 							switch i {
@@ -519,6 +512,7 @@ func RunGuiSetup(cfg *Config) bool {
 										if err := cfg.LoadFromFile(configFilePath); err == nil {
 											displayStr = strconv.Itoa(cfg.DisplayIndex)
 											fontSizeStr = strconv.Itoa(cfg.FontSize)
+											fixColorEditStr = fmt.Sprintf("%d,%d,%d,%d", cfg.FixationColor.R, cfg.FixationColor.G, cfg.FixationColor.B, cfg.FixationColor.A)
 											if cfg.AutodetectRes {
 												selectedRes = -1
 											} else {
@@ -544,14 +538,6 @@ func RunGuiSetup(cfg *Config) bool {
 								})
 								sdl.ShowOpenFileDialog(cb, window, filters, cfg.LastDir, false)
 							case 3:
-								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
-									if len(fileList) > 0 {
-										cfg.StimuliDir = fileList[0]
-										cfg.LastDir = cfg.StimuliDir
-									}
-								})
-								sdl.ShowOpenFolderDialog(cb, window, cfg.LastDir, false)
-							case 4:
 								filters := []sdl.DialogFileFilter{{Name: "Images", Pattern: "png;jpg;jpeg;bmp"}}
 								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
 									if len(fileList) > 0 {
@@ -560,7 +546,7 @@ func RunGuiSetup(cfg *Config) bool {
 									}
 								})
 								sdl.ShowOpenFileDialog(cb, window, filters, cfg.LastDir, false)
-							case 5:
+							case 4:
 								filters := []sdl.DialogFileFilter{{Name: "TTF Fonts", Pattern: "ttf;ttc"}}
 								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
 									if len(fileList) > 0 {
@@ -569,7 +555,7 @@ func RunGuiSetup(cfg *Config) bool {
 									}
 								})
 								sdl.ShowOpenFileDialog(cb, window, filters, cfg.LastDir, false)
-							case 6:
+							case 5:
 								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
 									if len(fileList) > 0 {
 										cfg.ResultsDir = fileList[0]
@@ -589,7 +575,7 @@ func RunGuiSetup(cfg *Config) bool {
 						cfg.AutodetectRes = false
 					}
 				}
-				// Autodetect checkbox
+				// Autodetect resolution checkbox
 				ryAuto := float32(ResStartYS + len(resOptions)*CheckSpacing)
 				if mx >= C2X && mx <= C2X+300 && my >= ryAuto && my <= ryAuto+CheckSize {
 					cfg.AutodetectRes = !cfg.AutodetectRes
@@ -600,17 +586,25 @@ func RunGuiSetup(cfg *Config) bool {
 					}
 				}
 
-				if mx >= C2X && mx <= C2X+200 && my >= OptionsY && my <= OptionsY+CheckSize {
-					cfg.UseFixation = !cfg.UseFixation
+				// Fixation mode radios
+				for i := 0; i < 3; i++ {
+					ry := float32(OptionsY + 25 + i*CheckSpacing)
+					if mx >= C2X && mx <= C2X+250 && my >= ry && my <= ry+CheckSize {
+						cfg.FixationMode = i
+					}
 				}
-				if mx >= C2X && mx <= C2X+200 && my >= OptionsY+CheckSpacing && my <= OptionsY+CheckSpacing+CheckSize {
-					cfg.Fullscreen = !cfg.Fullscreen
-				}
-				if mx >= C2X && mx <= C2X+200 && my >= OptionsY+2*CheckSpacing && my <= OptionsY+2*CheckSpacing+CheckSize {
+				if mx >= C2X && mx <= C2X+200 && my >= OptionsY+125 && my <= OptionsY+125+CheckSize {
 					cfg.SkipWait = !cfg.SkipWait
 				}
-				if mx >= C2X && mx <= C2X+200 && my >= OptionsY+3*CheckSpacing && my <= OptionsY+3*CheckSpacing+CheckSize {
+				if mx >= C2X && mx <= C2X+200 && my >= OptionsY+155 && my <= OptionsY+155+CheckSize {
 					cfg.VRR = !cfg.VRR
+				}
+				// Window mode radio buttons
+				for i := 0; i < 3; i++ {
+					ry := float32(WinModeY + i*CheckSpacing)
+					if mx >= C2X && mx <= C2X+250 && my >= ry && my <= ry+CheckSize {
+						cfg.WindowMode = i
+					}
 				}
 
 				if mx >= 350 && mx <= 450 && my >= StartBtnY && my <= StartBtnY+40 {
@@ -627,6 +621,7 @@ func RunGuiSetup(cfg *Config) bool {
 						if v, err := strconv.Atoi(fontSizeStr); err == nil {
 							cfg.FontSize = v
 						}
+						cfg.FixationColor = ParseColor(fixColorEditStr)
 						cfg.SaveCache()
 						return true
 					}
@@ -637,13 +632,13 @@ func RunGuiSetup(cfg *Config) bool {
 				}
 			case sdl.EVENT_TEXT_INPUT:
 				ti := e.TextInputEvent()
-				if target := getTargetField(focusBox, cfg, &configFilePath, &displayStr, &fontSizeStr); target != nil {
+				if target := getTargetField(focusBox, cfg, &configFilePath, &displayStr, &fontSizeStr, &fixColorEditStr); target != nil {
 					*target += ti.Text
 				}
 			case sdl.EVENT_KEY_DOWN:
 				ke := e.KeyboardEvent()
 				if focusBox != -1 && ke.Key == sdl.K_BACKSPACE {
-					if target := getTargetField(focusBox, cfg, &configFilePath, &displayStr, &fontSizeStr); target != nil {
+					if target := getTargetField(focusBox, cfg, &configFilePath, &displayStr, &fontSizeStr, &fixColorEditStr); target != nil {
 						if len(*target) > 0 {
 							_, size := utf8.DecodeLastRuneInString(*target)
 							*target = (*target)[:len(*target)-size]
@@ -657,43 +652,44 @@ func RunGuiSetup(cfg *Config) bool {
 		renderer.Clear()
 		black := sdl.Color{R: 0, G: 0, B: 0, A: 255}
 
-		col1Labels := []string{"Config File:", "Subject ID:", "Experiment CSV/TSV:", "Stimuli Directory:", "Start Splash Image:", "TTF Font File:", "Results Directory:"}
-		col1ShowBrowse := []bool{true, false, true, true, true, true, true}
+		col1Labels := []string{"Config File:", "Subject ID:", "Experiment CSV/TSV:", "Start Splash Image:", "TTF Font File:", "Results Directory:", "DLP Device:", "Display Index:", "Font Size:", "Fixation Color (R,G,B,A):"}
+		col1ShowBrowse := []bool{true, false, true, true, true, true, false, false, false, false}
 		for i, label := range col1Labels {
 			text := ""
 			switch i {
 			case 0: text = configFilePath
 			case 1: text = cfg.SubjectID
 			case 2: text = cfg.CSVFile
-			case 3: text = cfg.StimuliDir
-			case 4: text = cfg.StartSplash
-			case 5: text = cfg.FontFile
-			case 6: text = cfg.ResultsDir
+			case 3: text = cfg.StartSplash
+			case 4: text = cfg.FontFile
+			case 5: text = cfg.ResultsDir
+			case 6: text = cfg.DLPDevice
+			case 7: text = displayStr
+			case 8: text = fontSizeStr
+			case 9: text = fixColorEditStr
 			}
 			renderInputBox(renderer, guiFont, label, text, C1X, float32(40+i*RowSpacing), BoxW, BoxH, focusBox == i, col1ShowBrowse[i])
 		}
 
-		col2Labels := []string{"DLP Device:", "Display Index:", "Font Size:"}
-		for i, label := range col2Labels {
-			text := ""
-			switch i {
-			case 0: text = cfg.DLPDevice
-			case 1: text = displayStr
-			case 2: text = fontSizeStr
-			}
-			renderInputBox(renderer, guiFont, label, text, C2X, float32(40+i*RowSpacing), BoxW, BoxH, focusBox == 7+i, false)
+		renderText(renderer, guiFont, "Window mode:", C2X, WinModeY-25, black)
+		winModeLabels := []string{"Windowed", "Fullscreen Desktop", "Fullscreen (exclusive)"}
+		for i, lbl := range winModeLabels {
+			renderCheckbox(renderer, guiFont, lbl, C2X, float32(WinModeY+i*CheckSpacing), cfg.WindowMode == i)
 		}
 
 		renderText(renderer, guiFont, "Resolution:", C2X, ResStartYS-25, black)
 		for i, opt := range resOptions {
 			renderCheckbox(renderer, guiFont, opt.Label, C2X, float32(ResStartYS+i*CheckSpacing), selectedRes == i)
 		}
-		renderCheckbox(renderer, guiFont, "Autodetect (Exclusive Fullscreen)", C2X, float32(ResStartYS+len(resOptions)*CheckSpacing), cfg.AutodetectRes)
+		renderCheckbox(renderer, guiFont, "Autodetect resolution", C2X, float32(ResStartYS+len(resOptions)*CheckSpacing), cfg.AutodetectRes)
 
-		renderCheckbox(renderer, guiFont, "Show fixation cross", C2X, OptionsY, cfg.UseFixation)
-		renderCheckbox(renderer, guiFont, "Fullscreen mode", C2X, OptionsY+CheckSpacing, cfg.Fullscreen)
-		renderCheckbox(renderer, guiFont, "Skip 'Press any key' screen", C2X, OptionsY+2*CheckSpacing, cfg.SkipWait)
-		renderCheckbox(renderer, guiFont, "Variable Refresh Rate (VRR)", C2X, OptionsY+3*CheckSpacing, cfg.VRR)
+		renderText(renderer, guiFont, "Fixation cross:", C2X, OptionsY, black)
+		fixModeLabels := []string{"Never", "Blank screens only", "Always (superimposed)"}
+		for i, lbl := range fixModeLabels {
+			renderCheckbox(renderer, guiFont, lbl, C2X, float32(OptionsY+25+i*CheckSpacing), cfg.FixationMode == i)
+		}
+		renderCheckbox(renderer, guiFont, "Skip 'Press any key' screen", C2X, OptionsY+125, cfg.SkipWait)
+		renderCheckbox(renderer, guiFont, "Variable Refresh Rate (VRR)", C2X, OptionsY+155, cfg.VRR)
 
 		renderer.SetDrawColor(0, 120, 255, 255)
 		aboutBtn := sdl.FRect{X: 20, Y: StartBtnY, W: 80, H: 40}

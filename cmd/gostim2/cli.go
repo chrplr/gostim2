@@ -68,8 +68,10 @@ func main() {
 	displayIdx  := flag.Int("display", cfg.DisplayIndex, "Display index")
 	scaleFactor := flag.Float64("scale", float64(cfg.ScaleFactor), "Scale factor for stimuli")
 	noVSync     := flag.Bool("no-vsync", false, "Disable VSync")
-	noFixation  := flag.Bool("no-fixation", false, "Disable fixation cross")
-	fullscreen  := flag.Bool("fullscreen", cfg.Fullscreen, "Enable fullscreen")
+	noFixation      := flag.Bool("no-fixation", cfg.FixationMode == 0, "Never show fixation cross")
+	fixationAlways  := flag.Bool("fixation-always", cfg.FixationMode == 2, "Show fixation cross superimposed on stimuli")
+	fullscreen        := flag.Bool("fullscreen", cfg.WindowMode == 2, "Enable exclusive fullscreen")
+	fullscreenDesktop := flag.Bool("fullscreen-desktop", cfg.WindowMode == 1, "Enable fullscreen desktop (borderless)")
 	vrr         := flag.Bool("vrr", cfg.VRR, "Enable Variable Refresh Rate mode (disables VSync)")
 	bgColorStr  := flag.String("bg-color", fmt.Sprintf("%d,%d,%d,%d", cfg.BGColor.R, cfg.BGColor.G, cfg.BGColor.B, cfg.BGColor.A), "Background color (R,G,B,A)")
 	textColorStr := flag.String("text-color", fmt.Sprintf("%d,%d,%d,%d", cfg.TextColor.R, cfg.TextColor.G, cfg.TextColor.B, cfg.TextColor.A), "Text color (R,G,B,A)")
@@ -157,8 +159,22 @@ func main() {
 		cfg.VSync = false
 		cfg.VRR = true
 	}
-	cfg.UseFixation = !*noFixation
-	cfg.Fullscreen = *fullscreen
+	switch {
+	case *noFixation:
+		cfg.FixationMode = 0
+	case *fixationAlways:
+		cfg.FixationMode = 2
+	default:
+		cfg.FixationMode = 1
+	}
+	switch {
+	case *fullscreen:
+		cfg.WindowMode = 2
+	case *fullscreenDesktop:
+		cfg.WindowMode = 1
+	default:
+		cfg.WindowMode = 0
+	}
 	cfg.BGColor = engine.ParseColor(*bgColorStr)
 	cfg.TextColor = engine.ParseColor(*textColorStr)
 	cfg.FixationColor = engine.ParseColor(*fixColorStr)

@@ -23,8 +23,8 @@ type Config struct {
 	DisplayIndex  int       `toml:"display"`
 	ScaleFactor   float32   `toml:"scale"`
 	TotalDuration uint64    `toml:"total_duration"`
-	UseFixation   bool      `toml:"use_fixation"`
-	Fullscreen    bool      `toml:"fullscreen"`
+	FixationMode  int       `toml:"fixation_mode"` // 0=never, 1=blank screens only, 2=always (superimposed)
+	WindowMode    int       `toml:"window_mode"` // 0=windowed, 1=fullscreen desktop, 2=fullscreen exclusive
 	AutodetectRes bool      `toml:"autodetect_res"`
 	SkipWait      bool      `toml:"skip_wait"`
 	VSync         bool      `toml:"vsync"`
@@ -97,7 +97,7 @@ func DefaultConfig() *Config {
 		ScreenWidth:   1440,
 		ScreenHeight:  900,
 		ScaleFactor:   1.0,
-		UseFixation:   true,
+		FixationMode:  1,
 		VSync:         true,
 		BGColor:       sdl.Color{R: 0, G: 0, B: 0, A: 255},
 		TextColor:     sdl.Color{R: 255, G: 255, B: 255, A: 255},
