@@ -65,8 +65,7 @@ jobs:
           cp dist/gostim2${{ matrix.extension }} $ARCHIVE_NAME/
           cp dist/gostim2-gui${{ matrix.extension }} $ARCHIVE_NAME/
           cp README.md $ARCHIVE_NAME/README.txt 2>/dev/null || true
-          cp experiment.csv $ARCHIVE_NAME/ 2>/dev/null || true
-          if [ -d "assets" ]; then cp -r assets $ARCHIVE_NAME/; fi
+          if [ -d "examples" ]; then cp -r examples $ARCHIVE_NAME/; fi
           
           if [ "${{ matrix.goos }}" == "windows" ]; then
             zip -r $ARCHIVE_NAME.zip $ARCHIVE_NAME
@@ -117,11 +116,13 @@ jobs:
           bin_dir=$(find build_tmp -maxdepth 1 -type d -name "gostim2-*" | head -n 1)
           
           # 2. .deb package
-          mkdir -p deb/usr/local/bin deb/usr/share/applications deb/usr/share/pixmaps deb/DEBIAN
+          mkdir -p deb/usr/local/bin deb/usr/share/applications deb/usr/share/pixmaps deb/usr/share/gostim2 deb/DEBIAN
           cp "$bin_dir"/gostim2* deb/usr/local/bin/
           chmod +x deb/usr/local/bin/gostim2*
           cp gostim2.desktop deb/usr/share/applications/
           cp gui.png deb/usr/share/pixmaps/gostim2.png
+          cp -r "$bin_dir"/examples deb/usr/share/gostim2/
+          cp "$bin_dir"/README.txt deb/usr/share/gostim2/
           cat <<EOF > deb/DEBIAN/control
           Package: gostim2
           Version: ${VERSION}
@@ -132,11 +133,13 @@ jobs:
           dpkg-deb --build deb gostim2_${VERSION}_${{ matrix.deb_arch }}.deb
 
           # 3. AppImage preparation
-          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/bin AppDir/usr/share/gostim2
           cp "$bin_dir"/gostim2* AppDir/usr/bin/
           chmod +x AppDir/usr/bin/gostim2*
           cp gostim2.desktop AppDir/
           cp gui.png AppDir/gostim2.png
+          cp -r "$bin_dir"/examples AppDir/usr/share/gostim2/
+          cp "$bin_dir"/README.txt AppDir/usr/share/gostim2/
           
           # Verify binary architecture
           file AppDir/usr/bin/gostim2-gui
