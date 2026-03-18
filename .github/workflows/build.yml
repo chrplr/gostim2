@@ -58,7 +58,12 @@ jobs:
           LDFLAGS="-X 'gostim2/internal/version.Version=$VERSION' -X 'gostim2/internal/version.GitCommit=$COMMIT' -X 'gostim2/internal/version.BuildTime=$BUILD_TIME'"
           
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o dist/gostim2${{ matrix.extension }} ./cmd/gostim2
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o dist/gostim2-gui${{ matrix.extension }} ./cmd/gostim2-gui
+          
+          GUI_LDFLAGS="$LDFLAGS"
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            GUI_LDFLAGS="$LDFLAGS -H=windowsgui"
+          fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -ldflags "$GUI_LDFLAGS" -o dist/gostim2-gui${{ matrix.extension }} ./cmd/gostim2-gui
 
           ARCHIVE_NAME=gostim2-$VERSION-${{ matrix.artifact_os }}-${{ matrix.artifact_arch }}-binary
           mkdir -p $ARCHIVE_NAME

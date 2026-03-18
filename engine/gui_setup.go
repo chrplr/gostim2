@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 
 	"gostim2/internal/version"
@@ -109,36 +110,45 @@ func renderCenteredText(renderer *sdl.Renderer, font *ttf.Font, text string, rec
 
 // wrapText splits text into lines of at most maxChars characters, breaking at word boundaries.
 func wrapText(text string, maxChars int) []string {
-	words := []string{}
-	current := ""
-	for _, ch := range text {
-		if ch == ' ' {
-			words = append(words, current)
-			current = ""
-		} else {
-			current += string(ch)
+	var finalLines []string
+	for _, rawLine := range strings.Split(text, "\n") {
+		if rawLine == "" {
+			finalLines = append(finalLines, "")
+			continue
 		}
-	}
-	if current != "" {
-		words = append(words, current)
-	}
 
-	var lines []string
-	line := ""
-	for _, word := range words {
-		if line == "" {
-			line = word
-		} else if len(line)+1+len(word) <= maxChars {
-			line += " " + word
-		} else {
-			lines = append(lines, line)
-			line = word
+		words := strings.Fields(rawLine)
+		if len(words) == 0 {
+			finalLines = append(finalLines, "")
+			continue
+		}
+
+		line := ""
+		for _, word := range words {
+			// If a single word is too long (like an absolute path), split it
+			for len(word) > maxChars {
+				if line != "" {
+					finalLines = append(finalLines, line)
+					line = ""
+				}
+				finalLines = append(finalLines, word[:maxChars])
+				word = word[maxChars:]
+			}
+
+			if line == "" {
+				line = word
+			} else if len(line)+1+len(word) <= maxChars {
+				line += " " + word
+			} else {
+				finalLines = append(finalLines, line)
+				line = word
+			}
+		}
+		if line != "" {
+			finalLines = append(finalLines, line)
 		}
 	}
-	if line != "" {
-		lines = append(lines, line)
-	}
-	return lines
+	return finalLines
 }
 
 // ShowAboutDialog opens a modal window with program version and authorship information.
@@ -241,8 +251,8 @@ func ShowAboutDialog() {
 // ShowWarningDialog opens a modal window displaying a warning message with an OK button.
 func ShowWarningDialog(message string) {
 	const (
-		winW    = 520
-		winH    = 200
+		winW    = 700
+		winH    = 350
 		padding = float32(30)
 		btnW    = float32(80)
 		btnH    = float32(40)
@@ -268,7 +278,7 @@ func ShowWarningDialog(message string) {
 	}
 	defer font.Close()
 
-	lines := wrapText(message, 55)
+	lines := wrapText(message, 60)
 	okBtn := sdl.FRect{X: float32(winW)/2 - btnW/2, Y: float32(winH) - padding - btnH, W: btnW, H: btnH}
 	white := sdl.Color{R: 255, G: 255, B: 255, A: 255}
 	amber := sdl.Color{R: 180, G: 100, B: 0, A: 255}
@@ -313,8 +323,8 @@ func ShowWarningDialog(message string) {
 // ShowErrorDialog opens a modal-style window displaying the error message with a Quit button.
 func ShowErrorDialog(message string) {
 	const (
-		winW    = 620
-		winH    = 280
+		winW    = 900
+		winH    = 500
 		padding = float32(30)
 		btnW    = float32(100)
 		btnH    = float32(40)
@@ -340,7 +350,7 @@ func ShowErrorDialog(message string) {
 	}
 	defer font.Close()
 
-	lines := wrapText(message, 60)
+	lines := wrapText(message, 75)
 	quitBtn := sdl.FRect{X: float32(winW)/2 - btnW/2, Y: float32(winH) - padding - btnH, W: btnW, H: btnH}
 	white := sdl.Color{R: 255, G: 255, B: 255, A: 255}
 	red := sdl.Color{R: 180, G: 0, B: 0, A: 255}
@@ -647,7 +657,7 @@ func RunGuiSetup(cfg *Config) bool {
 		renderer.Clear()
 		black := sdl.Color{R: 0, G: 0, B: 0, A: 255}
 
-		col1Labels := []string{"Config File:", "Subject ID:", "Experiment CSV:", "Stimuli Directory:", "Start Splash Image:", "TTF Font File:", "Results Directory:"}
+		col1Labels := []string{"Config File:", "Subject ID:", "Experiment CSV/TSV:", "Stimuli Directory:", "Start Splash Image:", "TTF Font File:", "Results Directory:"}
 		col1ShowBrowse := []bool{true, false, true, true, true, true, true}
 		for i, label := range col1Labels {
 			text := ""

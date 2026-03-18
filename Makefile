@@ -22,7 +22,9 @@ help:
 ## build: Build CLI and GUI binaries for the current platform
 build:
 	go build -ldflags "$(LDFLAGS)" -o gostim2 ./cmd/gostim2
-	go build -ldflags "$(LDFLAGS)" -o gostim2-gui ./cmd/gostim2-gui
+	@gui_ldflags="$(LDFLAGS)"; \
+	if [ "$$(go env GOOS)" = "windows" ]; then gui_ldflags="$(LDFLAGS) -H=windowsgui"; fi; \
+	go build -ldflags "$$gui_ldflags" -o gostim2-gui ./cmd/gostim2-gui
 	@echo "Built gostim2 and gostim2-gui ($(VERSION))"
 
 ## build-multiplatform: Build CLI and GUI for all target platforms into dist/
@@ -32,18 +34,21 @@ build-multiplatform:
 		os=$$(echo $$platform | cut -d/ -f1); \
 		arch=$$(echo $$platform | cut -d/ -f2); \
 		ext=; [ "$$os" = "windows" ] && ext=.exe; \
+		gui_ldflags="$(LDFLAGS)"; [ "$$os" = "windows" ] && gui_ldflags="$(LDFLAGS) -H=windowsgui"; \
 		dir=$(DIST)/gostim2-$(VERSION)-$$os-$$arch; \
 		echo "Building $$os/$$arch..."; \
 		mkdir -p $$dir; \
 		GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o $$dir/gostim2$$ext ./cmd/gostim2 || exit 1; \
-		GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o $$dir/gostim2-gui$$ext ./cmd/gostim2-gui || exit 1; \
+		GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 go build -ldflags "$$gui_ldflags" -o $$dir/gostim2-gui$$ext ./cmd/gostim2-gui || exit 1; \
 	done
 	@echo "All builds written to $(DIST)/"
 
 ## install: Install binaries to GOPATH/bin
 install:
 	go install -ldflags "$(LDFLAGS)" ./cmd/gostim2
-	go install -ldflags "$(LDFLAGS)" ./cmd/gostim2-gui
+	@gui_ldflags="$(LDFLAGS)"; \
+	if [ "$$(go env GOOS)" = "windows" ]; then gui_ldflags="$(LDFLAGS) -H=windowsgui"; fi; \
+	go install -ldflags "$$gui_ldflags" ./cmd/gostim2-gui
 
 ## install-completion: Install bash and zsh completions for gostim2
 install-completion:

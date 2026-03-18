@@ -2,8 +2,8 @@
 
 Name "gostim2"
 OutFile "gostim2-setup.exe"
-InstallDir "$PROGRAMFILES\gostim2"
-RequestExecutionLevel admin
+InstallDir "$LOCALAPPDATA\gostim2"
+RequestExecutionLevel user
 
 !define MUI_ABORTWARNING
 

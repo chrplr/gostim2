@@ -37,7 +37,7 @@ Christophe Pallier Feb. 2026
 
 ## Usage
 
-There are two apps: a command line one (`gostim2`) and a graphical one (`gostim2-gui`). Here is a screenshot of the graphical interface:
+There are two apps: a command line one (`gostim2`) and a graphical one (`gostim2-gui`).
 
 
 ### Quick Start
@@ -84,7 +84,10 @@ To minimize video latencies on Linux, you can run the CLI version from a TTY con
 
 ## Experiment Configuration (CSV)
 
-The input CSV or TSV file must include at least these four columns in its header: `onset_time`, `duration`, `type`, and `stimuli`. Extra columns (like `cond`) are allowed and will be preserved in the output log.
+The stimuli scehdule is described in a table saved as a CSV or TSV file. This type of file can be created and edited with Spreadsheet software like LibreOffice Calc or Excel (see <https://ec.europa.eu/eurostat/web/user-guides/data-browser/download-data/tsv-excel>) or even a text file editor.
+
+The CSV or TSV file given as input to gostim2 must include at least these four columns in its header: `onset_time`, `duration`, `type`, and `stimuli`. Extra columns (e.g. `experimental_condition`) are allowed and will be preserved in the output log.
+
 
 **Toy Example (`experiment.csv`):**
 ```csv
@@ -136,7 +139,8 @@ If you just want to run the application, the easiest way is to download a pre-bu
 
 1.  **Download:** Go to the [GitHub Releases](https://github.com/chrplr/gostim2/releases) page.
 2.  **Choose your installer (Easiest):**
-    -   **Windows:** Download **`gostim2-setup.exe`**. Run it to install the app with a guided wizard and create desktop shortcuts.
+    -   **Windows:** Download **`gostim2-setup.exe`**. Run it to install the app. It installs to your local `AppData` folder (no admin rights required) and creates desktop shortcuts.
+        - *Note: The **examples** folder is installed in `%LOCALAPPDATA%\gostim2\examples` (usually `C:\Users\<YourName>\AppData\Local\gostim2\examples`).*
     -   **macOS:** Download **`gostim2-macos-installer.dmg`**. Open it and drag all the files into a single `gostim2` folder in your Applications folder. Provide correct permissions with:
                 chmod +x /Applications/gostim2/gostim2-gui
                 chmod +x /Applications/gostim2/gostim2
