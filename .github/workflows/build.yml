@@ -180,8 +180,32 @@ jobs:
         with:
           name: bin-windows-x86_64
           path: build_tmp
-      - name: Install NSIS
-        uses: iisidors/install-nsis@v1
+      - name: Install NSIS (with Retries)
+        shell: pwsh
+        run: |
+          $maxRetries = 5
+          $retryCount = 0
+          $success = $false
+          while (-not $success -and $retryCount -lt $maxRetries) {
+            try {
+              Write-Host "Attempting to install NSIS (Attempt $($retryCount + 1))..."
+              choco install nsis -y --no-progress --limit-output
+              if ($LASTEXITCODE -eq 0) {
+                $success = $true
+              } else {
+                throw "Choco exit code was $LASTEXITCODE"
+              }
+            } catch {
+              $retryCount++
+              if ($retryCount -lt $maxRetries) {
+                Write-Warning "Installation failed: $($_.Exception.Message). Retrying in 30 seconds..."
+                Start-Sleep -Seconds 30
+              } else {
+                Write-Error "Failed to install NSIS after $maxRetries attempts."
+                exit 1
+              }
+            }
+          }
       - name: Create Installer
         shell: pwsh
         run: |
@@ -193,13 +217,17 @@ jobs:
           Write-Host "Copying files from $($bin_dir.FullName) to current directory"
           Copy-Item "$($bin_dir.FullName)\*" . -Recurse -Force
           
-          # Try to find makensis in PATH, otherwise use common default locations
+          # Force refresh of PATH to find newly installed makensis
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          
+          # Try to find makensis
           $makensis = Get-Command makensis -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
           if (-not $makensis) {
             $paths = @(
               "C:\Program Files (x86)\NSIS\makensis.exe",
               "C:\Program Files\NSIS\Bin\makensis.exe",
-              "C:\Program Files (x86)\NSIS\Bin\makensis.exe"
+              "C:\Program Files (x86)\NSIS\Bin\makensis.exe",
+              "C:\Program Data\chocolatey\bin\makensis.exe"
             )
             foreach ($p in $paths) {
               if (Test-Path $p) {
@@ -210,9 +238,8 @@ jobs:
           }
           
           if (-not $makensis) {
-            Write-Error "makensis.exe not found in PATH or standard locations."
-            # List some directories to help debugging if it fails again
-            dir "C:\Program Files (x86)" -ErrorAction SilentlyContinue
+            Write-Error "makensis.exe not found. Listing Chocolatey bin content:"
+            dir "C:\ProgramData\chocolatey\bin" -ErrorAction SilentlyContinue
             exit 1
           }
           
