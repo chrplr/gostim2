@@ -1,36 +1,74 @@
 # Gostim2
 
-[HTML version](http://chrplr.github.io/gostim2) | [Github repository](http://github.com/chrplr/gostim2)
+* [HTML version of this document](http://chrplr.github.io/gostim2)  
+* [Github repository](http://github.com/chrplr/gostim2)
 
-Author: Christophe Pallier <christophe@pallier.org>
+![](gui.png)
 
-Gostim2-go is a multimedia stimulus delivery system designed for experimental psychology and cognitive neuroscience tasks requiring accurate timing and low-latency audio.
+Gostim2 is a multimedia stimulus delivery system designed for experimental psychology and cognitive neuroscience tasks requiring accurate timing and low-latency audio.
 
-**Building and running an experiment with gostim2 does not require any programming!** The experiment is fully described in a tabular text file (`.csv` or `.tsv`) that specifies the timings of stimuli.
+Building and running an experiment with gostim2 does not require any programming knowledge as the experimental paradigm is fully described in a table that describes the stimuli and their timing.
+Indeed, Gostim2 is meant for paradigmis where the stimuli are presented according to a *fixed, predefined schedule*. Although all keypress events are saved with timestamps, the behavior of the program cannot be modified in real-time (e.g., it is not possible to provide real-time feedback). There is no notion of "trial", only stimuli. This approach is suitable for fMRI/MEG/EEG experiments with rigid stimulus presentation schedules.
 
-Stimuli are presented according to a fixed, predefined schedule. Although all keypress events are saved with timestamps, the behavior of the program cannot be modified in real-time (e.g., to provide immediate feedback). There is no notion of "trial". This approach is suitable for fMRI/MEG/EEG experiments with rigid stimulus presentation schedules.
-*Note: If these constraints don't suit your needs and you're looking for a general Go library for psychology experiments, check out [goxpyriment](https://chrplr.github.io/goxpyriment).*
+Remark: For a general purpose, flexible module for building psychology experiments, **check out my other project: [goxpyriment](https://chrplr.github.io/goxpyriment).**
 
-
+Christophe Pallier Feb. 2026
 
 ---
 
 ## Table of Contents
-- [Experiment Configuration (CSV)](#experiment-configuration-csv)
+- [Usage](#usage)
+  - [Quick Start](#quick-start)
+  - [GUI Mode](#gui-mode)
+  - [CLI Mode](#cli-mode)
+  - [Linux Performance Note](#linux-performance-note)
+-- [Experiment Configuration (CSV)](#experiment-configuration-csv)
   - [Stimulus Types](#stimulus-types)
 - [Features](#features)
 - [Installation](#installation)
   - [Precompiled Binaries (Recommended)](#precompiled-binaries-recommended)
     - [Making the commands available from anywhere (Optional)](#making-the-commands-available-from-anywhere-optional)
   - [Building from Source](#building-from-source)
-- [Usage](#usage)
-  - [Quick Start](#quick-start)
-  - [GUI Mode](#gui-mode)
-  - [CLI Mode](#cli-mode)
-  - [Linux Performance Note](#linux-performance-note)
-- [License & Credits](#license--credits)
+ [License & Credits](#license--credits)
+
 
 ---
+
+## Usage
+
+There are two apps: a command line one (`gostim2`) and a graphical one (`gostim2-gui`). Here is a screenshot of the graphical interface:
+
+
+### Quick Start
+1. **Launch the GUI**: Run `./gostim2-gui`.
+2. **Configure**: 
+   - Click **"..."** next to **Experiment CSV** and select `examples/experiment_new.csv`.
+   - Ensure **Stimuli Directory** points to the `assets` folder.
+3. **Start**: Click the green **START** button. 
+4. **Interact**: Press any key when the "Press any key to start" message appears.
+5. **Exit**: Press **Escape** at any time to interrupt the experiment.
+
+### GUI Mode
+The GUI provides an interactive setup window to configure file paths, resolution, and experimental options (like fixation cross and fullscreen). It includes an **Autodetect (Exclusive Fullscreen)** option to automatically match your monitor's native resolution and bypass the desktop compositor. Settings are automatically cached for the next session.
+
+### CLI Mode
+For automated or console-only environments:
+```bash
+./gostim2 -csv experiment.csv [options]
+```
+**Common Options:**
+- `-csv`: Path to the stimulus CSV or TSV file (required).
+- `-stimuli-dir`: Directory containing image and sound assets.
+- `-res`: Screen resolution (e.g., `1920x1080` or `Autodetect` for native exclusive fullscreen).
+- `-font`: Path to a TTF font file.
+- `-output`: Path for the results CSV file (default: `results.csv`).
+- `-fullscreen`: Run in fullscreen mode.
+- `-display`: Index of the display to use (default: `0`).
+- `-dlp`: Serial device path for DLP-IO8-G triggers (e.g., `/dev/ttyUSB0`).
+
+### Linux Performance Note
+To minimize video latencies on Linux, you can run the CLI version from a TTY console (e.g., Ctrl-Alt-F3) after stopping the display manager (e.g., `systemctl stop gdm`). This allows the app to bypass Wayland/X11 and use the **Direct Rendering Manager (DRM)** directly.
+
 
 
 ## Experiment Configuration (CSV)
@@ -85,7 +123,7 @@ onset_time,duration,type,stimuli
 
 If you just want to run the application, the easiest way is to download a pre-built version for your computer.
 
-1.  **Download:** Go to the [GitHub Releases](https://github.com/chrplr/gostim2-go/releases) page.
+1.  **Download:** Go to the [GitHub Releases](https://github.com/chrplr/gostim2/releases) page.
 2.  **Choose your installer (Easiest):**
     -   **Windows:** Download **`gostim2-setup.exe`**. Run it to install the app with a guided wizard and create desktop shortcuts.
     -   **macOS:** Download **`gostim2-macos-installer.dmg`**. Open it and drag all the files into a single `gostim2` folder in your Applications folder. Provide correct permissions with:
@@ -145,7 +183,7 @@ To run `gostim2` or `gostim2-gui` from any terminal window without typing their 
 **Option A: Automate with PowerShell (Recommended)**
 1. Open the folder where you have downloaded the `.exe` files and `install-windows.ps1`.
 2. Right-click on **`install-windows.ps1`** and select **Run with PowerShell**. 
-3. If prompted to run as **Administrator**, click **Yes**. The script will automatically copy the files to `C:\Program Files\gostim2-go` and update your system `PATH`.
+3. If prompted to run as **Administrator**, click **Yes**. The script will automatically copy the files to `C:\Program Files\gostim2` and update your system `PATH`.
 
 **Option B: Manual Setup**
 1. Create a folder (e.g., `C:\bin`) and move the `.exe` files into it.
@@ -157,49 +195,11 @@ To run `gostim2` or `gostim2-gui` from any terminal window without typing their 
 7. Restart any open Command Prompt or PowerShell windows for the changes to take effect.
 
 
----
-
-## Usage
-
-There are two apps: a command line one (`gostim2`) and a graphical one (`gostim2-gui`). Here is a screenshot of the graphical interface:
-
-![](gui.png)
-
-### Quick Start
-1. **Launch the GUI**: Run `./gostim2-gui`.
-2. **Configure**: 
-   - Click **"..."** next to **Experiment CSV** and select `experiment_new.csv`.
-   - Ensure **Stimuli Directory** points to the `assets` folder.
-3. **Start**: Click the green **START** button. 
-4. **Interact**: Press any key when the "Press any key to start" message appears.
-5. **Exit**: Press **Escape** at any time to interrupt the experiment.
-
-### GUI Mode
-The GUI provides an interactive setup window to configure file paths, resolution, and experimental options (like fixation cross and fullscreen). It includes an **Autodetect (Exclusive Fullscreen)** option to automatically match your monitor's native resolution and bypass the desktop compositor. Settings are automatically cached for the next session.
-
-### CLI Mode
-For automated or console-only environments:
-```bash
-./gostim2 -csv experiment.csv [options]
-```
-**Common Options:**
-- `-csv`: Path to the stimulus CSV or TSV file (required).
-- `-stimuli-dir`: Directory containing image and sound assets.
-- `-res`: Screen resolution (e.g., `1920x1080` or `Autodetect` for native exclusive fullscreen).
-- `-font`: Path to a TTF font file.
-- `-output`: Path for the results CSV file (default: `results.csv`).
-- `-fullscreen`: Run in fullscreen mode.
-- `-display`: Index of the display to use (default: `0`).
-- `-dlp`: Serial device path for DLP-IO8-G triggers (e.g., `/dev/ttyUSB0`).
-
-### Linux Performance Note
-To minimize video latencies on Linux, run the CLI version from a TTY console (e.g., Ctrl-Alt-F3) after stopping the display manager (e.g., `systemctl stop gdm`). This allows the app to bypass Wayland/X11 and use the **Direct Rendering Manager (DRM)** directly.
-
 # License & Credits
 
-[This app](http://github.com/chrplr/gostim2-go) is a port of [audiovis](https://chrplr.github.io/audiovis/) to Go, using the [go-sdl3](https://github.com/Zyko0/go-sdl3) bindings (see also an [implementation in C](https://github.com/chrplr/gostim2)).
+[Gostim2](http://github.com/chrplr/gostim2) is a port of [audiovis](https://chrplr.github.io/audiovis/) to Go using the [go-sdl3](https://github.com/Zyko0/go-sdl3) bindings (see also an [implementation in C](https://github.com/chrplr/gostim2)).
 
-Developed by [Christophe Pallier](http://www.pallier.org) <christophe@pallier.org> using [Gemini CLI](https://github.com/google/gemini-cli).
+Author: [Christophe Pallier](http://www.pallier.org) <christophe@pallier.org> using Gemini CLI and Claude.
 
 The code is distributed under the **GNU GPLv3**.
 

@@ -123,7 +123,7 @@ func renderCenteredText(renderer *sdl.Renderer, font *ttf.Font, text string, rec
 }
 
 func RunGuiSetup(cfg *Config) bool {
-	window, renderer, err := sdl.CreateWindowAndRenderer("gostim2 Setup (Go) v2", 800, 800, 0)
+	window, renderer, err := sdl.CreateWindowAndRenderer("Gostim2", 800, 800, 0)
 	if err != nil {
 		fmt.Printf("CreateWindowAndRenderer Error: %v\n", err)
 		return false
@@ -219,7 +219,7 @@ func RunGuiSetup(cfg *Config) bool {
 				}
 
 				if mx >= 20 && mx <= 100 && my >= StartBtnY && my <= StartBtnY+40 {
-					openURL("https://chrplr.github.io/gostim2-go")
+					openURL("https://chrplr.github.io/gostim2")
 				}
 
 				if mx >= BrowseX && mx <= BrowseX+BrowseW {

@@ -214,7 +214,7 @@ jobs:
           cp -r "$bin_dir"/* dist_dmg/
           chmod +x dist_dmg/gostim2*
           create-dmg \
-            --volname "gostim2-go" \
+            --volname "gostim2" \
             --window-pos 200 120 \
             --window-size 800 400 \
             --icon-size 100 \

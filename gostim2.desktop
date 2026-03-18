@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=gostim2-go
+Name=gostim2
 Comment=Multimedia stimulus delivery system
 Exec=gostim2-gui
 Icon=gostim2

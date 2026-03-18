@@ -1,7 +1,7 @@
 # GEMINI.md - Project Context for gostim2 (Go Version)
 
 ## Project Overview
-`gostim2-go` is a high-precision multimedia stimulus delivery system designed for experimental psychology and neuroscience. It is a Go port of the original C-based `gostim2`, leveraging the SDL3 library for low-latency audio and frame-accurate visual presentation.
+`gostim2` is a high-precision multimedia stimulus delivery system designed for experimental psychology and neuroscience. It is a Go port of the original C-based `gostim2`, leveraging the SDL3 library for low-latency audio and frame-accurate visual presentation.
 
 ### Key Technologies
 - **Language:** Go (v1.25+)

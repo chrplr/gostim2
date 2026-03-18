@@ -1,8 +1,8 @@
 !include "MUI2.nsh"
 
-Name "gostim2-go"
+Name "gostim2"
 OutFile "gostim2-setup.exe"
-InstallDir "$PROGRAMFILES\gostim2-go"
+InstallDir "$PROGRAMFILES\gostim2"
 RequestExecutionLevel admin
 
 !define MUI_ABORTWARNING
@@ -31,9 +31,9 @@ Section "Install"
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 
     # Create shortcuts
-    CreateDirectory "$SMPROGRAMS\gostim2-go"
-    CreateShortcut "$SMPROGRAMS\gostim2-go\gostim2-gui.lnk" "$INSTDIR\gostim2-gui.exe"
-    CreateShortcut "$SMPROGRAMS\gostim2-go\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+    CreateDirectory "$SMPROGRAMS\gostim2"
+    CreateShortcut "$SMPROGRAMS\gostim2\gostim2-gui.lnk" "$INSTDIR\gostim2-gui.exe"
+    CreateShortcut "$SMPROGRAMS\gostim2\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 SectionEnd
 
 Section "Uninstall"
@@ -45,6 +45,6 @@ Section "Uninstall"
     Delete "$INSTDIR\Uninstall.exe"
 
     RMDir "$INSTDIR"
-    Delete "$SMPROGRAMS\gostim2-go\*.lnk"
-    RMDir "$SMPROGRAMS\gostim2-go"
+    Delete "$SMPROGRAMS\gostim2\*.lnk"
+    RMDir "$SMPROGRAMS\gostim2"
 SectionEnd

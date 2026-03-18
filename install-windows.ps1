@@ -1,7 +1,7 @@
-# Simple installation script for gostim2-go on Windows
+# Simple installation script for gostim2 on Windows
 # This script must be run as Administrator.
 
-$InstallDir = "C:\Program Files\gostim2-go"
+$InstallDir = "C:\Program Files\gostim2"
 $Executables = @("gostim2.exe", "gostim2-gui.exe")
 
 # 1. Create the installation directory if it doesn't exist
