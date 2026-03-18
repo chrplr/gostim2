@@ -180,8 +180,6 @@ jobs:
         with:
           name: bin-windows-x86_64
           path: build_tmp
-      - name: Install NSIS
-        run: choco install nsis -y
       - name: Create Installer
         shell: pwsh
         run: |
