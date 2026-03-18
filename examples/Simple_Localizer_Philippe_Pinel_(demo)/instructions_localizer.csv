@@ -1,0 +1,40 @@
+4000	box	Attention ! \n les intructions vont \ndéfiler automatiquement \net rapidement.\n Restez attentif ...
+7500	box	Durant les cinq prochaines minutes,\n vous aurez à effectuer de façon alternée,\n une succession de 4 tâches différentes.
+9000	box	1- Ecoute ou lecture de phrases :\n vous aurez juste à les \nécouter/lire attentivement \n(lecture silencieuse sans RIEN prononcer).
+8000	box	2- Ecoute ou lecture de soustractions :\n vous devrez les résoudre mentalement.\n- Ne PAS donner de réponse orale.\n- Faire les calculs jusqu'au bout.
+8000	box	3- 'Appuyez 3 fois sur le bouton gauche / droit' :\n pressez alors sur le bon bouton \naussi vite que possible (!!) \nsuivant les instructions auditives/visuelles \n (laisser l'autre main au repos). 
+7000	box	4- Visualisation passive\n de damiers noir et blanc\n \n (garder le regard au centre des damiers!)
+200	pict	checkerboard_hpb.bmp
+200	pict	checkerboard_hnb.bmp
+200	pict	checkerboard_hpb.bmp
+200	pict	checkerboard_hnb.bmp
+200	pict	checkerboard_hpb.bmp
+200	pict	checkerboard_hnb.bmp	
+7000	box	Les stimulations visuelles consisteront\n en une série de groupe de mots\n (phrase, instruction ou calcul)\n présentées rapidement.
+2000	text	en voici deux exemples
+1000	text	
+ 250	text	un incident
+ 100	text	
+ 250	text	s'est produit
+ 100	text	
+ 250	text	à l'entrée
+ 100	text	
+ 250	text	de l'usine
+4000	text	
+ 250	text	calculez
+ 100	text	
+ 250	text	neuf
+ 100	text	
+ 250	text	moins
+ 100	text	
+ 250	text	trois
+3000	text	
+7000	box	Durant chaque essai, évitez\n de bouger les yeux. Une croix\n vous aidera à garder votre regard\n au centre de l'écran\n.
+2000	text	
+6000	box	Les stimulations auditives (phrases,\n instruction ou calcul) ressembleront\n aux deux exemples suivants:
+1000	text	
+4000	sound	exemple.wav
+4000	sound	calc25.wav
+6000	box	ATTENTION!\n ces essais vont se succéder assez\nrapidement. Restez donc attentif\n tout au long de ces cinq minutes.
+2000	text	
+4000	box	\n\n Nous allons bientôt commencer\n

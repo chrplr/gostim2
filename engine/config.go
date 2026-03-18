@@ -11,7 +11,7 @@ import (
 type Config struct {
 	SubjectID     string    `toml:"subject_id"`
 	CSVFile       string    `toml:"csv_file"`
-	OutputFile    string    `toml:"output_file"`
+	ResultsDir    string    `toml:"results_dir"`
 	StimuliDir    string    `toml:"stimuli_dir"`
 	StartSplash   string    `toml:"start_splash"`
 	EndSplash     string    `toml:"end_splash"`
@@ -35,6 +35,7 @@ type Config struct {
 	BGColorStr    string    `toml:"bg_color"`
 	TextColorStr  string    `toml:"text_color"`
 	FixColorStr   string    `toml:"fixation_color"`
+	LastDir       string    `toml:"last_dir"`
 }
 
 func ParseColor(s string) sdl.Color {
@@ -46,7 +47,7 @@ func ParseColor(s string) sdl.Color {
 	return sdl.Color{R: r, G: g, B: b, A: a}
 }
 
-const CacheFile = ".gostim2_cache"
+const CacheFile = "gostim2_config.toml"
 
 func (cfg *Config) SaveCache() {
 	cfg.BGColorStr = fmt.Sprintf("%d,%d,%d,%d", cfg.BGColor.R, cfg.BGColor.G, cfg.BGColor.B, cfg.BGColor.A)
@@ -60,21 +61,18 @@ func (cfg *Config) SaveCache() {
 	defer f.Close()
 
 	if err := toml.NewEncoder(f).Encode(cfg); err != nil {
-		fmt.Printf("Error saving cache: %v\n", err)
+		fmt.Printf("Error saving config: %v\n", err)
 	}
 }
 
-func (cfg *Config) LoadCache() {
-	data, err := os.ReadFile(CacheFile)
+func (cfg *Config) LoadFromFile(path string) error {
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return
+		return err
 	}
-
 	if _, err := toml.Decode(string(data), cfg); err != nil {
-		fmt.Printf("Error loading cache: %v\n", err)
-		return
+		return fmt.Errorf("parsing %s: %w", path, err)
 	}
-
 	if cfg.BGColorStr != "" {
 		cfg.BGColor = ParseColor(cfg.BGColorStr)
 	}
@@ -84,11 +82,17 @@ func (cfg *Config) LoadCache() {
 	if cfg.FixColorStr != "" {
 		cfg.FixationColor = ParseColor(cfg.FixColorStr)
 	}
+	return nil
+}
+
+func (cfg *Config) LoadCache() {
+	_ = cfg.LoadFromFile(CacheFile)
 }
 
 func DefaultConfig() *Config {
+	cwd, _ := os.Getwd()
 	return &Config{
-		OutputFile:    "results.csv",
+		ResultsDir:    "gostim2-results",
 		FontSize:      50,
 		ScreenWidth:   1440,
 		ScreenHeight:  900,
@@ -99,5 +103,6 @@ func DefaultConfig() *Config {
 		TextColor:     sdl.Color{R: 255, G: 255, B: 255, A: 255},
 		FixationColor: sdl.Color{R: 255, G: 255, B: 255, A: 255},
 		SkipWait:      false,
+		LastDir:       cwd,
 	}
 }

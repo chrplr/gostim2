@@ -59,26 +59,26 @@ func main() {
 
 	cfg := engine.DefaultConfig()
 	cfg.LoadCache()
-	cfg.OutputFile = "" // Always start with empty results field
-	cfg.SubjectID = ""  // Always start with empty subject ID field
+	cfg.SubjectID = "" // Always start with empty subject ID field
 
-	// Default stimuli dir if empty
+	// Default stimuli dir if empty — check CWD as a convenience before any CSV is selected
 	if cfg.StimuliDir == "" {
-		if _, err := os.Stat("assets"); err == nil {
-			cfg.StimuliDir = "assets"
+		for _, candidate := range []string{"stimuli", "assets"} {
+			if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+				cfg.StimuliDir = candidate
+				break
+			}
 		}
 	}
 
 	for {
 		if engine.RunGuiSetup(cfg) {
-			savedFile, err := engine.Run(cfg)
+			_, err := engine.Run(cfg)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
+				engine.ShowErrorDialog(err.Error())
 			}
-			if savedFile != "" {
-				cfg.OutputFile = savedFile
-			}
-		} else {
+			} else {
 			break
 		}
 	}

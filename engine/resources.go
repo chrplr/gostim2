@@ -73,9 +73,10 @@ func NewResourceCache() *ResourceCache {
 	}
 }
 
-func (c *ResourceCache) Load(renderer *sdl.Renderer, exp *Experiment, font *ttf.Font, textColor sdl.Color, stimuliDir string) ([]Resource, error) {
+func (c *ResourceCache) Load(renderer *sdl.Renderer, exp *Experiment, font *ttf.Font, textColor sdl.Color, stimuliDir string) ([]Resource, []string, error) {
 	resources := make([]Resource, len(exp.Stimuli))
 	targetSpec := DefaultAudioSpec()
+	var warnings []string
 
 	for i, s := range exp.Stimuli {
 		resources[i] = Resource{
@@ -119,24 +120,28 @@ func (c *ResourceCache) Load(renderer *sdl.Renderer, exp *Experiment, font *ttf.
 			case StimImage:
 				tex, err := img.LoadTexture(renderer, fullPath)
 				if err != nil {
-					return nil, fmt.Errorf("failed to load image: %s (%v)", fullPath, err)
+					return nil, nil, fmt.Errorf("failed to load image: %s (%v)", fullPath, err)
 				}
 				entry.Texture = tex
 				w, h, _ := tex.Size()
 				entry.W, entry.H = w, h
 			case StimSound:
-				spec := &sdl.AudioSpec{}
-				data, err := sdl.LoadWAV(fullPath, spec)
+				data, spec, err := loadAudioFile(fullPath)
 				if err != nil {
-					return nil, fmt.Errorf("failed to load sound %s: %v", fullPath, err)
+					return nil, nil, fmt.Errorf("failed to load sound %s: %v", fullPath, err)
 				}
 				if spec.Format == targetSpec.Format && spec.Channels == targetSpec.Channels && spec.Freq == targetSpec.Freq {
-					entry.Sound.Spec = *spec
+					entry.Sound.Spec = spec
 					entry.Sound.Data = data
 				} else {
-					dstData, err := sdl.ConvertAudioSamples(spec, data, &targetSpec)
+					if spec.Freq != targetSpec.Freq {
+						warnings = append(warnings, fmt.Sprintf(
+							"sample rate mismatch: %s is %d Hz, engine is %d Hz (resampling applied)",
+							path, spec.Freq, targetSpec.Freq))
+					}
+					dstData, err := sdl.ConvertAudioSamples(&spec, data, &targetSpec)
 					if err != nil {
-						return nil, fmt.Errorf("failed to convert sound %s to target format: %v", fullPath, err)
+						return nil, nil, fmt.Errorf("failed to convert sound %s to target format: %v", fullPath, err)
 					}
 					entry.Sound.Spec = targetSpec
 					entry.Sound.Data = dstData
@@ -145,49 +150,49 @@ func (c *ResourceCache) Load(renderer *sdl.Renderer, exp *Experiment, font *ttf.
 				if font != nil {
 					surf, err := font.RenderTextBlended(path, textColor)
 					if err != nil {
-						return nil, fmt.Errorf("failed to render text '%s': %v", path, err)
+						return nil, nil, fmt.Errorf("failed to render text '%s': %v", path, err)
 					}
 					if surf == nil {
-						return nil, fmt.Errorf("failed to render text '%s': null surface", path)
+						return nil, nil, fmt.Errorf("failed to render text '%s': null surface", path)
 					}
 					tex, err := renderer.CreateTextureFromSurface(surf)
 					if err != nil {
 						surf.Destroy()
-						return nil, fmt.Errorf("failed to create texture for text '%s': %v", path, err)
+						return nil, nil, fmt.Errorf("failed to create texture for text '%s': %v", path, err)
 					}
 					entry.Texture = tex
 					entry.W = float32(surf.W)
 					entry.H = float32(surf.H)
 					surf.Destroy()
 				} else {
-					return nil, fmt.Errorf("cannot render text stimulus (no font loaded)")
+					return nil, nil, fmt.Errorf("cannot render text stimulus (no font loaded)")
 				}
 			case StimBox:
 				if font != nil {
 					// Use RenderTextBlendedWrapped for multiline support
 					surf, err := font.RenderTextBlendedWrapped(path, textColor, 0) // 0 for no wrap width limit (use explicit \n)
 					if err != nil {
-						return nil, fmt.Errorf("failed to render multiline box '%s': %v", path, err)
+						return nil, nil, fmt.Errorf("failed to render multiline box '%s': %v", path, err)
 					}
 					if surf == nil {
-						return nil, fmt.Errorf("failed to render multiline box '%s': null surface", path)
+						return nil, nil, fmt.Errorf("failed to render multiline box '%s': null surface", path)
 					}
 					tex, err := renderer.CreateTextureFromSurface(surf)
 					if err != nil {
 						surf.Destroy()
-						return nil, fmt.Errorf("failed to create texture for box '%s': %v", path, err)
+						return nil, nil, fmt.Errorf("failed to create texture for box '%s': %v", path, err)
 					}
 					entry.Texture = tex
 					entry.W = float32(surf.W)
 					entry.H = float32(surf.H)
 					surf.Destroy()
 				} else {
-					return nil, fmt.Errorf("cannot render box stimulus (no font loaded)")
+					return nil, nil, fmt.Errorf("cannot render box stimulus (no font loaded)")
 				}
 			case StimVideo:
 				vr, err := loadVideo(renderer, fullPath)
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				entry.Video = vr
 			}
@@ -207,7 +212,7 @@ func (c *ResourceCache) Load(renderer *sdl.Renderer, exp *Experiment, font *ttf.
 		}
 	}
 
-	return resources, nil
+	return resources, warnings, nil
 }
 
 func (c *ResourceCache) Destroy() {

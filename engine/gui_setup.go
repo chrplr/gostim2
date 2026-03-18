@@ -2,44 +2,29 @@ package engine
 
 import (
 	"fmt"
-	"os/exec"
-	"runtime"
+	"path/filepath"
 	"strconv"
 	"unicode/utf8"
+
+	"gostim2/internal/version"
 
 	"github.com/Zyko0/go-sdl3/sdl"
 	"github.com/Zyko0/go-sdl3/ttf"
 )
 
-func openURL(url string) error {
-	var cmd string
-	var args []string
 
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "rundll32"
-		args = []string{"url.dll,FileProtocolHandler", url}
-	case "darwin":
-		cmd = "open"
-		args = []string{url}
-	default: // linux, bsd, etc.
-		cmd = "xdg-open"
-		args = []string{url}
-	}
-	return exec.Command(cmd, args...).Start()
-}
-
-func getTargetField(focusBox int, cfg *Config, displayStr, fontSizeStr *string) *string {
+func getTargetField(focusBox int, cfg *Config, configFilePath, displayStr, fontSizeStr *string) *string {
 	switch focusBox {
-	case 0: return &cfg.SubjectID
-	case 1: return &cfg.CSVFile
-	case 2: return &cfg.StimuliDir
-	case 3: return &cfg.OutputFile
+	case 0: return configFilePath
+	case 1: return &cfg.SubjectID
+	case 2: return &cfg.CSVFile
+	case 3: return &cfg.StimuliDir
 	case 4: return &cfg.StartSplash
 	case 5: return &cfg.FontFile
-	case 6: return &cfg.DLPDevice
-	case 7: return displayStr
-	case 8: return fontSizeStr
+	case 6: return &cfg.ResultsDir
+	case 7: return &cfg.DLPDevice
+	case 8: return displayStr
+	case 9: return fontSizeStr
 	default: return nil
 	}
 }
@@ -122,6 +107,285 @@ func renderCenteredText(renderer *sdl.Renderer, font *ttf.Font, text string, rec
 	renderText(renderer, font, text, x, y, color)
 }
 
+// wrapText splits text into lines of at most maxChars characters, breaking at word boundaries.
+func wrapText(text string, maxChars int) []string {
+	words := []string{}
+	current := ""
+	for _, ch := range text {
+		if ch == ' ' {
+			words = append(words, current)
+			current = ""
+		} else {
+			current += string(ch)
+		}
+	}
+	if current != "" {
+		words = append(words, current)
+	}
+
+	var lines []string
+	line := ""
+	for _, word := range words {
+		if line == "" {
+			line = word
+		} else if len(line)+1+len(word) <= maxChars {
+			line += " " + word
+		} else {
+			lines = append(lines, line)
+			line = word
+		}
+	}
+	if line != "" {
+		lines = append(lines, line)
+	}
+	return lines
+}
+
+// ShowAboutDialog opens a modal window with program version and authorship information.
+func ShowAboutDialog() {
+	const (
+		winW    = 540
+		winH    = 300
+		padding = float32(30)
+		btnW    = float32(100)
+		btnH    = float32(40)
+		lineH   = float32(26)
+	)
+
+	window, renderer, err := sdl.CreateWindowAndRenderer("About Gostim2", winW, winH, sdl.WINDOW_ALWAYS_ON_TOP)
+	if err != nil {
+		return
+	}
+	defer window.Destroy()
+	defer renderer.Destroy()
+
+	fontPath := GetDefaultFontPath()
+	if fontPath == "" {
+		return
+	}
+	font, err := ttf.OpenFont(fontPath, 18)
+	if err != nil {
+		return
+	}
+	defer font.Close()
+
+	boldFont, err := ttf.OpenFont(fontPath, 20)
+	if err != nil {
+		boldFont = font
+	} else {
+		boldFont.SetStyle(ttf.FontStyleFlags(1)) // TTF_STYLE_BOLD
+		defer boldFont.Close()
+	}
+
+	lines := []string{
+		"Gostim2 " + version.Version,
+		"",
+		"\u00a9 2026 Christophe Pallier <christophe@pallier.org>",
+		"License: GNU General Public License v3",
+		"Source:  https://github.com/chrplr/gostim2",
+	}
+
+	closeBtn := sdl.FRect{X: float32(winW)/2 - btnW/2, Y: float32(winH) - padding - btnH, W: btnW, H: btnH}
+	white := sdl.Color{R: 255, G: 255, B: 255, A: 255}
+	dark := sdl.Color{R: 30, G: 30, B: 30, A: 255}
+	blue := sdl.Color{R: 0, G: 80, B: 180, A: 255}
+
+	for {
+		var e sdl.Event
+		for sdl.PollEvent(&e) {
+			switch e.Type {
+			case sdl.EVENT_QUIT:
+				return
+			case sdl.EVENT_KEY_DOWN:
+				ke := e.KeyboardEvent()
+				if ke.Key == sdl.K_ESCAPE || ke.Key == sdl.K_RETURN {
+					return
+				}
+			case sdl.EVENT_MOUSE_BUTTON_DOWN:
+				me := e.MouseButtonEvent()
+				if me.X >= closeBtn.X && me.X <= closeBtn.X+closeBtn.W &&
+					me.Y >= closeBtn.Y && me.Y <= closeBtn.Y+closeBtn.H {
+					return
+				}
+			}
+		}
+
+		renderer.SetDrawColor(245, 245, 255, 255)
+		renderer.Clear()
+
+		y := padding
+		for i, line := range lines {
+			if line == "" {
+				y += lineH / 2
+				continue
+			}
+			f := font
+			c := dark
+			if i == 0 {
+				f = boldFont
+				c = blue
+			}
+			renderText(renderer, f, line, padding, y, c)
+			y += lineH
+		}
+
+		renderer.SetDrawColor(0, 100, 200, 255)
+		renderer.RenderFillRect(&closeBtn)
+		renderCenteredText(renderer, font, "Close", closeBtn, white)
+
+		renderer.Present()
+		sdl.Delay(10)
+	}
+}
+
+// ShowWarningDialog opens a modal window displaying a warning message with an OK button.
+func ShowWarningDialog(message string) {
+	const (
+		winW    = 520
+		winH    = 200
+		padding = float32(30)
+		btnW    = float32(80)
+		btnH    = float32(40)
+	)
+
+	window, renderer, err := sdl.CreateWindowAndRenderer("Warning", winW, winH, sdl.WINDOW_ALWAYS_ON_TOP)
+	if err != nil {
+		fmt.Printf("Warning: %v\n", message)
+		return
+	}
+	defer window.Destroy()
+	defer renderer.Destroy()
+
+	fontPath := GetDefaultFontPath()
+	if fontPath == "" {
+		fmt.Printf("Warning: %v\n", message)
+		return
+	}
+	font, err := ttf.OpenFont(fontPath, 18)
+	if err != nil {
+		fmt.Printf("Warning: %v\n", message)
+		return
+	}
+	defer font.Close()
+
+	lines := wrapText(message, 55)
+	okBtn := sdl.FRect{X: float32(winW)/2 - btnW/2, Y: float32(winH) - padding - btnH, W: btnW, H: btnH}
+	white := sdl.Color{R: 255, G: 255, B: 255, A: 255}
+	amber := sdl.Color{R: 180, G: 100, B: 0, A: 255}
+
+	for {
+		var e sdl.Event
+		for sdl.PollEvent(&e) {
+			switch e.Type {
+			case sdl.EVENT_QUIT:
+				return
+			case sdl.EVENT_KEY_DOWN:
+				ke := e.KeyboardEvent()
+				if ke.Key == sdl.K_ESCAPE || ke.Key == sdl.K_RETURN {
+					return
+				}
+			case sdl.EVENT_MOUSE_BUTTON_DOWN:
+				me := e.MouseButtonEvent()
+				if me.X >= okBtn.X && me.X <= okBtn.X+okBtn.W &&
+					me.Y >= okBtn.Y && me.Y <= okBtn.Y+okBtn.H {
+					return
+				}
+			}
+		}
+
+		renderer.SetDrawColor(255, 248, 220, 255) // cornsilk background
+		renderer.Clear()
+
+		renderText(renderer, font, "Warning", padding, padding, amber)
+		for i, line := range lines {
+			renderText(renderer, font, line, padding, padding+30+float32(i)*26, sdl.Color{R: 30, G: 30, B: 30, A: 255})
+		}
+
+		renderer.SetDrawColor(amber.R, amber.G, amber.B, amber.A)
+		renderer.RenderFillRect(&okBtn)
+		renderCenteredText(renderer, font, "OK", okBtn, white)
+
+		renderer.Present()
+		sdl.Delay(10)
+	}
+}
+
+// ShowErrorDialog opens a modal-style window displaying the error message with a Quit button.
+func ShowErrorDialog(message string) {
+	const (
+		winW    = 620
+		winH    = 280
+		padding = float32(30)
+		btnW    = float32(100)
+		btnH    = float32(40)
+	)
+
+	window, renderer, err := sdl.CreateWindowAndRenderer("Error", winW, winH, sdl.WINDOW_ALWAYS_ON_TOP)
+	if err != nil {
+		fmt.Printf("Error (could not open dialog): %v\n", message)
+		return
+	}
+	defer window.Destroy()
+	defer renderer.Destroy()
+
+	fontPath := GetDefaultFontPath()
+	if fontPath == "" {
+		fmt.Printf("Error: %v\n", message)
+		return
+	}
+	font, err := ttf.OpenFont(fontPath, 18)
+	if err != nil {
+		fmt.Printf("Error: %v\n", message)
+		return
+	}
+	defer font.Close()
+
+	lines := wrapText(message, 60)
+	quitBtn := sdl.FRect{X: float32(winW)/2 - btnW/2, Y: float32(winH) - padding - btnH, W: btnW, H: btnH}
+	white := sdl.Color{R: 255, G: 255, B: 255, A: 255}
+	red := sdl.Color{R: 180, G: 0, B: 0, A: 255}
+
+	for {
+		var e sdl.Event
+		for sdl.PollEvent(&e) {
+			switch e.Type {
+			case sdl.EVENT_QUIT:
+				return
+			case sdl.EVENT_KEY_DOWN:
+				ke := e.KeyboardEvent()
+				if ke.Key == sdl.K_ESCAPE || ke.Key == sdl.K_RETURN {
+					return
+				}
+			case sdl.EVENT_MOUSE_BUTTON_DOWN:
+				me := e.MouseButtonEvent()
+				if me.X >= quitBtn.X && me.X <= quitBtn.X+quitBtn.W &&
+					me.Y >= quitBtn.Y && me.Y <= quitBtn.Y+quitBtn.H {
+					return
+				}
+			}
+		}
+
+		renderer.SetDrawColor(255, 240, 240, 255)
+		renderer.Clear()
+
+		// Title
+		renderText(renderer, font, "Error", padding, padding, sdl.Color{R: 180, G: 0, B: 0, A: 255})
+
+		// Message lines
+		for i, line := range lines {
+			renderText(renderer, font, line, padding, padding+30+float32(i)*26, sdl.Color{R: 30, G: 30, B: 30, A: 255})
+		}
+
+		// Quit button
+		renderer.SetDrawColor(red.R, red.G, red.B, red.A)
+		renderer.RenderFillRect(&quitBtn)
+		renderCenteredText(renderer, font, "Quit", quitBtn, white)
+
+		renderer.Present()
+		sdl.Delay(10)
+	}
+}
+
 func RunGuiSetup(cfg *Config) bool {
 	window, renderer, err := sdl.CreateWindowAndRenderer("Gostim2", 800, 800, 0)
 	if err != nil {
@@ -143,6 +407,15 @@ func RunGuiSetup(cfg *Config) bool {
 	}
 	defer guiFont.Close()
 
+	btnFont, err := ttf.OpenFont(fontPath, 18)
+	if err != nil {
+		btnFont = guiFont // fallback
+	} else {
+		btnFont.SetStyle(ttf.FontStyleFlags(1)) // TTF_STYLE_BOLD
+		defer btnFont.Close()
+	}
+
+	configFilePath := ""
 	displayStr := strconv.Itoa(cfg.DisplayIndex)
 	fontSizeStr := strconv.Itoa(cfg.FontSize)
 
@@ -201,7 +474,7 @@ func RunGuiSetup(cfg *Config) bool {
 				mx, my := me.X, me.Y
 
 				focusBox = -1
-				for i := 0; i < 6; i++ {
+				for i := 0; i < 7; i++ {
 					by := float32(40 + i*RowSpacing)
 					if mx >= C1X && mx <= C1X+BoxW && my >= by && my <= by+BoxH {
 						focusBox = i
@@ -212,59 +485,88 @@ func RunGuiSetup(cfg *Config) bool {
 					for i := 0; i < 3; i++ {
 						by := float32(40 + i*RowSpacing)
 						if mx >= C2X && mx <= C2X+BoxW && my >= by && my <= by+BoxH {
-							focusBox = 6 + i
+							focusBox = 7 + i
 							break
 						}
 					}
 				}
 
 				if mx >= 20 && mx <= 100 && my >= StartBtnY && my <= StartBtnY+40 {
-					openURL("https://chrplr.github.io/gostim2")
+					ShowAboutDialog()
 				}
 
 				if mx >= BrowseX && mx <= BrowseX+BrowseW {
-					for i := 1; i < 6; i++ {
+					for i := 0; i < 7; i++ {
 						by := float32(40 + i*RowSpacing)
 						if my >= by && my <= by+BoxH {
 							switch i {
-							case 1:
+							case 0:
+								filters0 := []sdl.DialogFileFilter{{Name: "Config Files", Pattern: "toml"}}
+								cb0 := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
+									if len(fileList) > 0 {
+										configFilePath = fileList[0]
+										cfg.LastDir = filepath.Dir(configFilePath)
+										if err := cfg.LoadFromFile(configFilePath); err == nil {
+											displayStr = strconv.Itoa(cfg.DisplayIndex)
+											fontSizeStr = strconv.Itoa(cfg.FontSize)
+											if cfg.AutodetectRes {
+												selectedRes = -1
+											} else {
+												selectedRes = 3
+												for j, res := range resOptions {
+													if cfg.ScreenWidth == res.W && cfg.ScreenHeight == res.H {
+														selectedRes = j
+														break
+													}
+												}
+											}
+										}
+									}
+								})
+								sdl.ShowOpenFileDialog(cb0, window, filters0, cfg.LastDir, false)
+							case 2:
 								filters := []sdl.DialogFileFilter{{Name: "Experiment Files (CSV/TSV)", Pattern: "csv;tsv"}}
 								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
 									if len(fileList) > 0 {
 										cfg.CSVFile = fileList[0]
+										cfg.LastDir = filepath.Dir(cfg.CSVFile)
 									}
 								})
-								sdl.ShowOpenFileDialog(cb, window, filters, "", false)
-							case 2:
-								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
-									if len(fileList) > 0 {
-										cfg.StimuliDir = fileList[0]
-									}
-								})
-								sdl.ShowOpenFolderDialog(cb, window, "", false)
+								sdl.ShowOpenFileDialog(cb, window, filters, cfg.LastDir, false)
 							case 3:
 								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
 									if len(fileList) > 0 {
-										cfg.OutputFile = fileList[0]
+										cfg.StimuliDir = fileList[0]
+										cfg.LastDir = cfg.StimuliDir
 									}
 								})
-								sdl.ShowSaveFileDialog(cb, window, nil, "results.csv")
+								sdl.ShowOpenFolderDialog(cb, window, cfg.LastDir, false)
 							case 4:
 								filters := []sdl.DialogFileFilter{{Name: "Images", Pattern: "png;jpg;jpeg;bmp"}}
 								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
 									if len(fileList) > 0 {
 										cfg.StartSplash = fileList[0]
+										cfg.LastDir = filepath.Dir(cfg.StartSplash)
 									}
 								})
-								sdl.ShowOpenFileDialog(cb, window, filters, "", false)
+								sdl.ShowOpenFileDialog(cb, window, filters, cfg.LastDir, false)
 							case 5:
 								filters := []sdl.DialogFileFilter{{Name: "TTF Fonts", Pattern: "ttf;ttc"}}
 								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
 									if len(fileList) > 0 {
 										cfg.FontFile = fileList[0]
+										cfg.LastDir = filepath.Dir(cfg.FontFile)
 									}
 								})
-								sdl.ShowOpenFileDialog(cb, window, filters, "", false)
+								sdl.ShowOpenFileDialog(cb, window, filters, cfg.LastDir, false)
+							case 6:
+								cb := sdl.NewDialogFileCallback(func(fileList []string, filter int32) {
+									if len(fileList) > 0 {
+										cfg.ResultsDir = fileList[0]
+										cfg.LastDir = cfg.ResultsDir
+									}
+								})
+								sdl.ShowOpenFolderDialog(cb, window, cfg.LastDir, false)
 							}
 						}
 					}
@@ -302,7 +604,9 @@ func RunGuiSetup(cfg *Config) bool {
 				}
 
 				if mx >= 350 && mx <= 450 && my >= StartBtnY && my <= StartBtnY+40 {
-					if cfg.CSVFile != "" {
+					if cfg.CSVFile == "" {
+						ShowWarningDialog("Select a config file or an Experiment CSV file")
+					} else {
 						if selectedRes >= 0 && selectedRes < len(resOptions) {
 							cfg.ScreenWidth = resOptions[selectedRes].W
 							cfg.ScreenHeight = resOptions[selectedRes].H
@@ -323,13 +627,13 @@ func RunGuiSetup(cfg *Config) bool {
 				}
 			case sdl.EVENT_TEXT_INPUT:
 				ti := e.TextInputEvent()
-				if target := getTargetField(focusBox, cfg, &displayStr, &fontSizeStr); target != nil {
+				if target := getTargetField(focusBox, cfg, &configFilePath, &displayStr, &fontSizeStr); target != nil {
 					*target += ti.Text
 				}
 			case sdl.EVENT_KEY_DOWN:
 				ke := e.KeyboardEvent()
 				if focusBox != -1 && ke.Key == sdl.K_BACKSPACE {
-					if target := getTargetField(focusBox, cfg, &displayStr, &fontSizeStr); target != nil {
+					if target := getTargetField(focusBox, cfg, &configFilePath, &displayStr, &fontSizeStr); target != nil {
 						if len(*target) > 0 {
 							_, size := utf8.DecodeLastRuneInString(*target)
 							*target = (*target)[:len(*target)-size]
@@ -343,18 +647,20 @@ func RunGuiSetup(cfg *Config) bool {
 		renderer.Clear()
 		black := sdl.Color{R: 0, G: 0, B: 0, A: 255}
 
-		col1Labels := []string{"Subject ID:", "Experiment CSV:", "Stimuli Directory:", "Output Results CSV:", "Start Splash Image:", "TTF Font File:"}
+		col1Labels := []string{"Config File:", "Subject ID:", "Experiment CSV:", "Stimuli Directory:", "Start Splash Image:", "TTF Font File:", "Results Directory:"}
+		col1ShowBrowse := []bool{true, false, true, true, true, true, true}
 		for i, label := range col1Labels {
 			text := ""
 			switch i {
-			case 0: text = cfg.SubjectID
-			case 1: text = cfg.CSVFile
-			case 2: text = cfg.StimuliDir
-			case 3: text = cfg.OutputFile
+			case 0: text = configFilePath
+			case 1: text = cfg.SubjectID
+			case 2: text = cfg.CSVFile
+			case 3: text = cfg.StimuliDir
 			case 4: text = cfg.StartSplash
 			case 5: text = cfg.FontFile
+			case 6: text = cfg.ResultsDir
 			}
-			renderInputBox(renderer, guiFont, label, text, C1X, float32(40+i*RowSpacing), BoxW, BoxH, focusBox == i, i > 0)
+			renderInputBox(renderer, guiFont, label, text, C1X, float32(40+i*RowSpacing), BoxW, BoxH, focusBox == i, col1ShowBrowse[i])
 		}
 
 		col2Labels := []string{"DLP Device:", "Display Index:", "Font Size:"}
@@ -365,7 +671,7 @@ func RunGuiSetup(cfg *Config) bool {
 			case 1: text = displayStr
 			case 2: text = fontSizeStr
 			}
-			renderInputBox(renderer, guiFont, label, text, C2X, float32(40+i*RowSpacing), BoxW, BoxH, focusBox == 6+i, false)
+			renderInputBox(renderer, guiFont, label, text, C2X, float32(40+i*RowSpacing), BoxW, BoxH, focusBox == 7+i, false)
 		}
 
 		renderText(renderer, guiFont, "Resolution:", C2X, ResStartYS-25, black)
@@ -380,20 +686,20 @@ func RunGuiSetup(cfg *Config) bool {
 		renderCheckbox(renderer, guiFont, "Variable Refresh Rate (VRR)", C2X, OptionsY+3*CheckSpacing, cfg.VRR)
 
 		renderer.SetDrawColor(0, 120, 255, 255)
-		helpBtn := sdl.FRect{X: 20, Y: StartBtnY, W: 80, H: 40}
-		renderer.RenderFillRect(&helpBtn)
+		aboutBtn := sdl.FRect{X: 20, Y: StartBtnY, W: 80, H: 40}
+		renderer.RenderFillRect(&aboutBtn)
 		white := sdl.Color{R: 255, G: 255, B: 255, A: 255}
-		renderCenteredText(renderer, guiFont, "HELP", helpBtn, white)
+		renderCenteredText(renderer, btnFont, "ABOUT", aboutBtn, white)
 
 		renderer.SetDrawColor(0, 150, 0, 255)
 		startBtn := sdl.FRect{X: 350, Y: StartBtnY, W: 100, H: 40}
 		renderer.RenderFillRect(&startBtn)
-		renderCenteredText(renderer, guiFont, "START", startBtn, white)
+		renderCenteredText(renderer, btnFont, "START", startBtn, white)
 
 		renderer.SetDrawColor(180, 0, 0, 255)
 		quitBtn := sdl.FRect{X: 690, Y: StartBtnY, W: 100, H: 40}
 		renderer.RenderFillRect(&quitBtn)
-		renderCenteredText(renderer, guiFont, "QUIT", quitBtn, white)
+		renderCenteredText(renderer, btnFont, "QUIT", quitBtn, white)
 
 		renderer.Present()
 		sdl.Delay(10)

@@ -23,30 +23,58 @@ func init() {
 	runtime.LockOSThread()
 }
 
+// prescanConfig extracts the value of -config / --config from os.Args before
+// flag.Parse() runs, so we can load defaults from that file first.
+func prescanConfig(args []string) string {
+	for i, arg := range args {
+		for _, prefix := range []string{"-config=", "--config="} {
+			if strings.HasPrefix(arg, prefix) {
+				return strings.TrimPrefix(arg, prefix)
+			}
+		}
+		if (arg == "-config" || arg == "--config") && i+1 < len(args) {
+			return args[i+1]
+		}
+	}
+	return ""
+}
+
 func main() {
+	// Load config file early so its values can serve as flag defaults.
+	cfg := engine.DefaultConfig()
+	if path := prescanConfig(os.Args[1:]); path != "" {
+		if err := cfg.LoadFromFile(path); err != nil {
+			fmt.Fprintf(os.Stderr, "Error loading config file %s: %v\n", path, err)
+			os.Exit(1)
+		}
+	}
+
 	showVersion := flag.Bool("version", false, "Print version info and exit")
-	csvFile := flag.String("csv", "", "Stimulus CSV file")
-	subjectID := flag.String("subject", "", "Subject ID")
-	outputFile := flag.String("output", "", "Output CSV file (default: auto-generated from CSV name and timestamp)")
-	stimuliDir := flag.String("stimuli-dir", "", "Directory containing stimuli")
-	startSplash := flag.String("start-splash", "", "Start splash image")
-	endSplash := flag.String("end-splash", "", "End splash image")
-	fontFile := flag.String("font", "", "TTF font file")
-	fontSize := flag.Int("font-size", 50, "Font size")
-	dlpDevice := flag.String("dlp", "", "DLP-IO8-G device")
-	res := flag.String("res", "", "Screen resolution (e.g. 1920x1080 or Autodetect)")
-	screenW := flag.Int("width", 1440, "Screen width")
-	screenH := flag.Int("height", 900, "Screen height")
-	displayIdx := flag.Int("display", 0, "Display index")
-	scaleFactor := flag.Float64("scale", 1.0, "Scale factor for stimuli")
-	noVSync := flag.Bool("no-vsync", false, "Disable VSync")
-	noFixation := flag.Bool("no-fixation", false, "Disable fixation cross")
-	fullscreen := flag.Bool("fullscreen", false, "Enable fullscreen")
-	vrr := flag.Bool("vrr", false, "Enable Variable Refresh Rate mode (disables VSync)")
-	bgColorStr := flag.String("bg-color", "0,0,0,255", "Background color (R,G,B,A)")
-	textColorStr := flag.String("text-color", "255,255,255,255", "Text color (R,G,B,A)")
-	fixColorStr := flag.String("fixation-color", "255,255,255,255", "Fixation color (R,G,B,A)")
-        skipWait := flag.Bool("skip-wait", false, "Skip 'Press any key to start' message")
+	configFile  := flag.String("config", "", "Load parameters from a TOML config file (e.g. gostim2_config.toml)")
+	csvFile     := flag.String("csv", cfg.CSVFile, "Stimulus CSV/TSV file")
+	tsvFile     := flag.String("tsv", "", "Stimulus TSV file (alias for -csv)")
+	subjectID   := flag.String("subject", cfg.SubjectID, "Subject ID")
+	resultsDir  := flag.String("results-dir", cfg.ResultsDir, "Directory where result files are saved")
+	stimuliDir  := flag.String("stimuli-dir", cfg.StimuliDir, "Directory containing stimuli")
+	assetsDir   := flag.String("assets", "", "Directory containing stimuli (alias for -stimuli-dir)")
+	startSplash := flag.String("start-splash", cfg.StartSplash, "Start splash image")
+	endSplash   := flag.String("end-splash", cfg.EndSplash, "End splash image")
+	fontFile    := flag.String("font", cfg.FontFile, "TTF font file")
+	fontSize    := flag.Int("font-size", cfg.FontSize, "Font size")
+	dlpDevice   := flag.String("dlp", cfg.DLPDevice, "DLP-IO8-G device")
+	res         := flag.String("res", "", "Screen resolution (e.g. 1920x1080 or Autodetect)")
+	screenW     := flag.Int("width", cfg.ScreenWidth, "Screen width")
+	screenH     := flag.Int("height", cfg.ScreenHeight, "Screen height")
+	displayIdx  := flag.Int("display", cfg.DisplayIndex, "Display index")
+	scaleFactor := flag.Float64("scale", float64(cfg.ScaleFactor), "Scale factor for stimuli")
+	noVSync     := flag.Bool("no-vsync", false, "Disable VSync")
+	noFixation  := flag.Bool("no-fixation", false, "Disable fixation cross")
+	fullscreen  := flag.Bool("fullscreen", cfg.Fullscreen, "Enable fullscreen")
+	vrr         := flag.Bool("vrr", cfg.VRR, "Enable Variable Refresh Rate mode (disables VSync)")
+	bgColorStr  := flag.String("bg-color", fmt.Sprintf("%d,%d,%d,%d", cfg.BGColor.R, cfg.BGColor.G, cfg.BGColor.B, cfg.BGColor.A), "Background color (R,G,B,A)")
+	textColorStr := flag.String("text-color", fmt.Sprintf("%d,%d,%d,%d", cfg.TextColor.R, cfg.TextColor.G, cfg.TextColor.B, cfg.TextColor.A), "Text color (R,G,B,A)")
+	fixColorStr  := flag.String("fixation-color", fmt.Sprintf("%d,%d,%d,%d", cfg.FixationColor.R, cfg.FixationColor.G, cfg.FixationColor.B, cfg.FixationColor.A), "Fixation color (R,G,B,A)")
+	skipWait    := flag.Bool("skip-wait", cfg.SkipWait, "Skip 'Press any key to start' message")
 
 	flag.Parse()
 
@@ -54,6 +82,10 @@ func main() {
 		fmt.Print(version.Info())
 		os.Exit(0)
 	}
+
+	// If -config was given but not pre-scanned (shouldn't happen), load now.
+	// This also handles the case where the user wants to see config applied.
+	_ = configFile
 
 	defer binsdl.Load().Unload()
 	defer binimg.Load().Unload()
@@ -77,19 +109,22 @@ func main() {
 	go func() {
 		<-sigChan
 		fmt.Println("\nReceived interrupt, exiting...")
-		// Push a quit event to the SDL queue to trigger graceful shutdown
 		sdl.PushEvent(&sdl.Event{Type: sdl.EVENT_QUIT})
 	}()
 
-	cfg := engine.DefaultConfig()
-
 	cfg.CSVFile = *csvFile
+	if cfg.CSVFile == "" {
+		cfg.CSVFile = *tsvFile
+	}
 	if cfg.CSVFile == "" && flag.NArg() > 0 {
 		cfg.CSVFile = flag.Arg(0)
 	}
 	cfg.SubjectID = *subjectID
-	cfg.OutputFile = *outputFile
+	cfg.ResultsDir = *resultsDir
 	cfg.StimuliDir = *stimuliDir
+	if cfg.StimuliDir == "" {
+		cfg.StimuliDir = *assetsDir
+	}
 	cfg.StartSplash = *startSplash
 	cfg.EndSplash = *endSplash
 	cfg.FontFile = *fontFile

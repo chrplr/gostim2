@@ -1,9 +1,7 @@
 onset_time,duration,type,cond,stimuli
 1000,500,IMAGE,Mu,Mu04.png
 2000,500,IMAGE,Face,face01.png
-3000,500,TEXT,Greeting,Hello !
 4000,500,IMAGE,Body,body03.png
-5000,1,SOUND,Animal,sound02.wav
 6000,500,IMAGE,House,house03.png
 7000,500,IMAGE,Face,face12.png
 8000,500,IMAGE,Mu,Mu01.png
@@ -44,4 +42,3 @@ onset_time,duration,type,cond,stimuli
 45000,500,IMAGE,Equation,eq01.png
 46000,500,IMAGE,Graphic,graph07.png
 47000,500,IMAGE,Face,face13.png
-48000,1,SOUND,Animal,sound01.wav

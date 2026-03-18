@@ -1,11 +1,24 @@
 package engine
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
 func TestLoadStreamExperiment(t *testing.T) {
-	exp, err := LoadExperiment("../experiment_stream_test.tsv")
+	content := `onset_time	duration	type	stimuli
+1000	500	IMAGE_STREAM	img1.png:200:50~img2.png:300:400
+2000	200	TEXT_STREAM	txt1:100:20~txt2
+3000	500	SOUND_STREAM	snd1:100:10~snd2
+`
+	dir := t.TempDir()
+	path := filepath.Join(dir, "experiment_stream_test.tsv")
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatalf("Failed to write test file: %v", err)
+	}
+
+	exp, err := LoadExperiment(path)
 	if err != nil {
 		t.Fatalf("Failed to load experiment: %v", err)
 	}

@@ -1,0 +1,31 @@
+onset_time	duration	type	stimuli
+500	1	SOUND	jabber_title.mp3
+7500	2000	TEXT	'Twas brillig, and the slithy toves
+10000	2000	TEXT	Did gyre and gimble in the wabe;
+12500	2000	TEXT	All mimsy were the borogoves,
+15000	2000	TEXT	And the mome raths outgrabe.
+17500	2000	TEXT	Beware the Jabberwock, my son!
+20000	2000	TEXT	The jaws that bite, the claws that catch!
+22500	2000	TEXT	Beware the Jubjub bird, and shun
+25000	2000	TEXT	The frumious Bandersnatch!
+27500	2000	TEXT	He took his vorpal sword in hand:
+30000	2000	TEXT	Long time the manxome foe he soughtâ€”
+32500	2000	TEXT	So rested he by the Tumtum tree,
+35000	2000	TEXT	And stood awhile in thought.
+37500	2000	TEXT	And as in uffish thought he stood,
+40000	2000	TEXT	The Jabberwock, with eyes of flame,
+42500	2000	TEXT	Came whiffling through the tulgey wood,
+45000	2000	TEXT	And burbled as it came!
+47500	2000	TEXT	One, two! One, two! And through and through
+50000	2000	TEXT	The vorpal blade went snicker-snack!
+52500	2000	TEXT	He left it dead, and with its head
+55000	2000	TEXT	He went galumphing back.
+57500	2000	TEXT	And hast thou slain the Jabberwock?
+60000	2000	TEXT	Come to my arms, my beamish boy!
+62500	2000	TEXT	O frabjous day! Callooh! Callay!
+65000	2000	TEXT	He chortled in his joy.
+67500	2000	TEXT	'Twas brillig, and the slithy toves
+70000	2000	TEXT	Did gyre and gimble in the wabe;
+72500	2000	TEXT	All mimsy were the borogoves,
+75000	2000	TEXT	And the mome raths outgrabe. 
+78000	3000	TEXT	*** Lewis Carroll ***

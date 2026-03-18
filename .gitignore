@@ -1,6 +1,6 @@
 results*
+/dist/
 /stuff_not_commited/
 /gostim2
 /gostim2-gui
-.gostim2_cache
-test-getticks*
+gostim2_config.toml

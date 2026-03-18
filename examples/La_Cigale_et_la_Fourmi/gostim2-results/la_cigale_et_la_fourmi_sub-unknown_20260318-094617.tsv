@@ -1,0 +1,66 @@
+# gostim2 version: v0.1.1-1-gdf321bc (Go version)
+# Author: Christophe Pallier <christophe@pallier.org>
+# License: GPLv3
+# GitHub: https://github.com/chrplr/gostim2
+# SDL Version: 3.4.0
+# Platform: linux
+# Hostname: is158520
+# Username: cp983411
+# Video Driver: wayland
+# Audio Driver: pipewire
+# Audio Sample Rate: 44100 Hz
+# Renderer: opengl
+# Display Mode: 1920x1080 @ 60.00Hz (Physical)
+# Logical Resolution: 1440x900
+# Font: /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf
+# Font Size: 50
+# Start Date: 2026-03-18 09:45:34.170
+# End Date: 2026-03-18 09:46:17.700
+# Completion Status: Completed Normally
+# Command Line: ../../gostim2 la_cigale_et_la_fourmi.tsv
+subject_id	intended_ms	actual_ms	type	label	onset_time	duration	type	stimuli
+unknown	1000	999	SOUND_ONSET	LaCigaleEtLaFourmi_titre.flac	1000	1	SOUND	LaCigaleEtLaFourmi_titre.flac
+unknown	8500	8492	TEXT_ONSET	La Cigale, ayant chanté tout l’été,	8500	1250	TEXT	La Cigale, ayant chanté tout l’été,
+unknown	9750	9743	TEXT_OFFSET	La Cigale, ayant chanté tout l’été,	8500	1250	TEXT	La Cigale, ayant chanté tout l’été,
+unknown	10000	9993	TEXT_ONSET	Se trouva fort dépourvue	10000	1250	TEXT	Se trouva fort dépourvue
+unknown	11250	11244	TEXT_OFFSET	Se trouva fort dépourvue	10000	1250	TEXT	Se trouva fort dépourvue
+unknown	11500	11493	TEXT_ONSET	Quand la bise fut venue :	11500	1250	TEXT	Quand la bise fut venue :
+unknown	12750	12758	TEXT_OFFSET	Quand la bise fut venue :	11500	1250	TEXT	Quand la bise fut venue :
+unknown	13000	12992	TEXT_ONSET	Pas un seul petit  morceau	13000	1250	TEXT	Pas un seul petit  morceau
+unknown	14250	14243	TEXT_OFFSET	Pas un seul petit  morceau	13000	1250	TEXT	Pas un seul petit  morceau
+unknown	14500	14521	TEXT_ONSET	De mouche ou  de vermisseau.	14500	1250	TEXT	De mouche ou  de vermisseau.
+unknown	15750	15774	TEXT_OFFSET	De mouche ou  de vermisseau.	14500	1250	TEXT	De mouche ou  de vermisseau.
+unknown	16000	16008	TEXT_ONSET	Elle alla crier famine	16000	1250	TEXT	Elle alla crier famine
+unknown	17250	17259	TEXT_OFFSET	Elle alla crier famine	16000	1250	TEXT	Elle alla crier famine
+unknown	17500	17493	TEXT_ONSET	Chez la  Fourmi sa voisine,	17500	1250	TEXT	Chez la  Fourmi sa voisine,
+unknown	18750	18743	TEXT_OFFSET	Chez la  Fourmi sa voisine,	17500	1250	TEXT	Chez la  Fourmi sa voisine,
+unknown	19000	18994	TEXT_ONSET	La priant de  lui  prêter	19000	1250	TEXT	La priant de  lui  prêter
+unknown	20250	20259	TEXT_OFFSET	La priant de  lui  prêter	19000	1250	TEXT	La priant de  lui  prêter
+unknown	20500	20492	TEXT_ONSET	Quelque grain pour subsister	20500	1250	TEXT	Quelque grain pour subsister
+unknown	21750	21758	TEXT_OFFSET	Quelque grain pour subsister	20500	1250	TEXT	Quelque grain pour subsister
+unknown	22000	21992	TEXT_ONSET	Jusqu’à la saison nouvelle.	22000	1250	TEXT	Jusqu’à la saison nouvelle.
+unknown	23250	23243	TEXT_OFFSET	Jusqu’à la saison nouvelle.	22000	1250	TEXT	Jusqu’à la saison nouvelle.
+unknown	23500	23493	TEXT_ONSET	«  Je vous paierai, lui  dit-elle,	23500	1250	TEXT	«  Je vous paierai, lui  dit-elle,
+unknown	24750	24744	TEXT_OFFSET	«  Je vous paierai, lui  dit-elle,	23500	1250	TEXT	«  Je vous paierai, lui  dit-elle,
+unknown	25000	24993	TEXT_ONSET	Avant  l’Août, foi d’animal,	25000	1250	TEXT	Avant  l’Août, foi d’animal,
+unknown	26250	26259	TEXT_OFFSET	Avant  l’Août, foi d’animal,	25000	1250	TEXT	Avant  l’Août, foi d’animal,
+unknown	26500	26492	TEXT_ONSET	Intérêt  et principal. »	26500	1250	TEXT	Intérêt  et principal. »
+unknown	27750	27757	TEXT_OFFSET	Intérêt  et principal. »	26500	1250	TEXT	Intérêt  et principal. »
+unknown	28000	28007	TEXT_ONSET	La Fourmi n’est  pas  prêteuse :	28000	1250	TEXT	La Fourmi n’est  pas  prêteuse :
+unknown	29250	29259	TEXT_OFFSET	La Fourmi n’est  pas  prêteuse :	28000	1250	TEXT	La Fourmi n’est  pas  prêteuse :
+unknown	29500	29492	TEXT_ONSET	C’est là  son moindre    défaut.	29500	1250	TEXT	C’est là  son moindre    défaut.
+unknown	30750	30744	TEXT_OFFSET	C’est là  son moindre    défaut.	29500	1250	TEXT	C’est là  son moindre    défaut.
+unknown	31000	30994	TEXT_ONSET	Que faisiez-vous  au temps  chaud ?	31000	1250	TEXT	Que faisiez-vous  au temps  chaud ?
+unknown	32250	32261	TEXT_OFFSET	Que faisiez-vous  au temps  chaud ?	31000	1250	TEXT	Que faisiez-vous  au temps  chaud ?
+unknown	32500	32494	TEXT_ONSET	Dit-elle  à cette  emprunteuse.	32500	1250	TEXT	Dit-elle  à cette  emprunteuse.
+unknown	33750	33758	TEXT_OFFSET	Dit-elle  à cette  emprunteuse.	32500	1250	TEXT	Dit-elle  à cette  emprunteuse.
+unknown	34000	33992	TEXT_ONSET	Nuit et jour à  tout venant	34000	1250	TEXT	Nuit et jour à  tout venant
+unknown	35250	35243	TEXT_OFFSET	Nuit et jour à  tout venant	34000	1250	TEXT	Nuit et jour à  tout venant
+unknown	35500	35518	TEXT_ONSET	Je chantais,  ne  vous  déplaise.	35500	1250	TEXT	Je chantais,  ne  vous  déplaise.
+unknown	36750	36778	TEXT_OFFSET	Je chantais,  ne  vous  déplaise.	35500	1250	TEXT	Je chantais,  ne  vous  déplaise.
+unknown	37000	36994	TEXT_ONSET	Vous chantiez ?  j’en suis fort  aise.	37000	1250	TEXT	Vous chantiez ?  j’en suis fort  aise.
+unknown	38250	38260	TEXT_OFFSET	Vous chantiez ?  j’en suis fort  aise.	37000	1250	TEXT	Vous chantiez ?  j’en suis fort  aise.
+unknown	38500	38493	TEXT_ONSET	Eh bien!  dansez maintenant.	38500	1250	TEXT	Eh bien!  dansez maintenant.
+unknown	39750	39760	TEXT_OFFSET	Eh bien!  dansez maintenant.	38500	1250	TEXT	Eh bien!  dansez maintenant.
+unknown	40000	39993	TEXT_ONSET	***	40000	3000	TEXT	***
+unknown	43000	42994	TEXT_OFFSET	***	40000	3000	TEXT	***

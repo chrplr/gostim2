@@ -1,0 +1,38 @@
+# gostim2 version: v0.1.1-1-gdf321bc (Go version)
+# Author: Christophe Pallier <christophe@pallier.org>
+# License: GPLv3
+# GitHub: https://github.com/chrplr/gostim2
+# SDL Version: 3.4.0
+# Platform: linux
+# Hostname: is158520
+# Username: cp983411
+# Video Driver: wayland
+# Audio Driver: pipewire
+# Audio Sample Rate: 44100 Hz
+# Renderer: opengl
+# Display Mode: 1536x960 @ 60.04Hz (Physical)
+# Logical Resolution: 1024x768
+# Font: /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf
+# Font Size: 50
+# Start Date: 2026-03-18 11:56:38.344
+# End Date: 2026-03-18 11:57:04.092
+# Completion Status: Aborted (ESC or Quit)
+# Command Line: ../../gostim2-gui
+# Warning: sample rate mismatch: jabber_title.mp3 is 24000 Hz, engine is 44100 Hz (resampling applied)
+subject_id	intended_ms	actual_ms	type	label	onset_time	duration	type	stimuli
+unknown	500	506	SOUND_ONSET	jabber_title.mp3	500	1	SOUND	jabber_title.mp3
+unknown	7500	7504	TEXT_ONSET	'Twas brillig, and the slithy toves	7500	2000	TEXT	'Twas brillig, and the slithy toves
+unknown	9500	9504	TEXT_OFFSET	'Twas brillig, and the slithy toves	7500	2000	TEXT	'Twas brillig, and the slithy toves
+unknown	10000	10004	TEXT_ONSET	Did gyre and gimble in the wabe;	10000	2000	TEXT	Did gyre and gimble in the wabe;
+unknown	12000	12020	TEXT_OFFSET	Did gyre and gimble in the wabe;	10000	2000	TEXT	Did gyre and gimble in the wabe;
+unknown	12500	12503	TEXT_ONSET	All mimsy were the borogoves,	12500	2000	TEXT	All mimsy were the borogoves,
+unknown	14500	14519	TEXT_OFFSET	All mimsy were the borogoves,	12500	2000	TEXT	All mimsy were the borogoves,
+unknown	15000	15002	TEXT_ONSET	And the mome raths outgrabe.	15000	2000	TEXT	And the mome raths outgrabe.
+unknown	17000	17016	TEXT_OFFSET	And the mome raths outgrabe.	15000	2000	TEXT	And the mome raths outgrabe.
+unknown	17500	17499	TEXT_ONSET	Beware the Jabberwock, my son!	17500	2000	TEXT	Beware the Jabberwock, my son!
+unknown	19500	19515	TEXT_OFFSET	Beware the Jabberwock, my son!	17500	2000	TEXT	Beware the Jabberwock, my son!
+unknown	20000	19998	TEXT_ONSET	The jaws that bite, the claws that catch!	20000	2000	TEXT	The jaws that bite, the claws that catch!
+unknown	22000	22013	TEXT_OFFSET	The jaws that bite, the claws that catch!	20000	2000	TEXT	The jaws that bite, the claws that catch!
+unknown	22500	22496	TEXT_ONSET	Beware the Jubjub bird, and shun	22500	2000	TEXT	Beware the Jubjub bird, and shun
+unknown	24500	24513	TEXT_OFFSET	Beware the Jubjub bird, and shun	22500	2000	TEXT	Beware the Jubjub bird, and shun
+unknown	25000	24994	TEXT_ONSET	The frumious Bandersnatch!	25000	2000	TEXT	The frumious Bandersnatch!

@@ -1,103 +1,63 @@
-# GEMINI.md - Project Context for gostim2 (Go Version)
+# GEMINI.md - Technical Context & Architecture
 
-## Project Overview
-`gostim2` is a high-precision multimedia stimulus delivery system designed for experimental psychology and neuroscience. It is a Go port of the original C-based `gostim2`, leveraging the SDL3 library for low-latency audio and frame-accurate visual presentation.
+This document provides technical context, architectural decisions, and hidden dependencies for Gostim2, intended for developers and AI assistants.
 
-### Key Technologies
-- **Language:** Go (v1.25+)
-- **Graphics & Audio:** [SDL3](https://www.libsdl.org/) via [go-sdl3](https://github.com/Zyko0/go-sdl3) bindings.
-- **Serial Communication:** [go.bug.st/serial](https://github.com/bugst/go-serial) for DLP-IO8-G trigger devices (no CGo required).
-- **Configuration Parsing:** [github.com/BurntSushi/toml](https://github.com/BurntSushi/toml) for persisted settings.
+## 🏗️ Architecture Overview
 
-## Codebase Architecture
+Gostim2 is a high-precision stimulus delivery system. Unlike many experimental platforms, it follows a **Fixed Schedule** model: the entire experiment is deterministic and known before execution.
 
-### Entry Points
-- `cmd/gostim2`: CLI entry point (`cli.go`). Handles argument parsing (including the `-res` flag for resolution and exclusive fullscreen) and terminal-based experiment execution.
-- `cmd/gostim2-gui`: GUI entry point (`main.go`). Launches the interactive configuration window with support for native resolution autodetection.
+### Core Components
+- **`engine/run.go`**: The main execution loop. It orchestrates the transition from setup to experiment.
+- **`engine/experiment.go`**: Contains the `experimentState` and the primary `RunExperiment` loop.
+- **`engine/csv_parser.go`**: Handles the flexible parsing of CSV/TSV files, including the complex "Stream" syntax (`~` and `:` delimiters).
+- **`engine/audio_mixer.go`**: A custom software mixer designed for low-latency playback without thread-blocking issues common in higher-level libraries.
 
-### Engine Components (`engine/`)
-- `experiment.go`: The core high-precision timing loop. Orchestrates stimulus onset/offset, event logging, and user input handling.
-- `audio.go`: Implements a custom software audio mixer. Manages audio playback buffers and ensures thread-safe, low-latency sound delivery.
-- `video.go`: Handles SDL3 window management, renderer setup, and logical scaling. Support for DRM (Direct Rendering Manager) on Linux.
-- `resources.go`: Implements the `ResourceCache`. Pre-loads all assets (textures, sounds, fonts) to eliminate disk I/O during the experiment.
-- `stimuli.go`: Defines the stimulus data structures and provides rendering logic for images, text, and boxes.
-- `csv_parser.go`: Parses stimulus schedules from CSV/TSV files, supporting complex RSVP stream formats.
-- `validator.go`: Ensures the experiment CSV is logically sound (no overlapping stimuli, valid types, existing assets).
-- `config.go`: Manages application settings (TOML-based persistence) and experiment parameters.
-- `dlp.go`: Handles serial communication for sending triggers to DLP-IO8-G devices.
-- `run.go`: Provides high-level orchestration for initializing SDL, loading resources, and running the experiment loop.
+## ⏱️ Timing & Precision
 
-### Metadata & Versioning
-- `internal/version`: Manages version strings, Git commit hashes, and build timestamps injected during compilation.
+Precision is the primary technical goal of Gostim2.
 
-## Display & Resolution
+### The Timing Loop
+- **VSYNC Synchronization**: When `-vsync` is enabled, the loop synchronizes with the monitor's refresh rate.
+- **Predictive Look-ahead (`laNS`)**: To ensure frame-perfect onsets, the engine uses a look-ahead (typically half a frame duration). If the next stimulus onset falls within this window, it is prepared for the *next* VBLANK.
+- **VRR Mode**: When `-vrr` is enabled, VSYNC is disabled, and the engine uses a busy-wait loop (`vrrWaitNS` = 2ms) to hit timestamps with sub-millisecond accuracy.
 
-The engine supports multiple display modes to ensure optimal performance and visual accuracy:
+### Resolution & Scaling
+- **Autodetect Mode**: Uses "Exclusive Fullscreen" to bypass the desktop compositor, which is critical for preventing frame drops and minimizing input lag.
+- **Scale Factor**: All visual stimuli are scaled by `cfg.ScaleFactor`. This allows running the same experiment on different monitors while maintaining relative stimulus size.
 
-### Exclusive Fullscreen (Autodetect)
-- Enabled via `-res Autodetect` in the CLI or the "Autodetect (Exclusive Fullscreen)" checkbox in the GUI.
-- The system queries the native desktop resolution before creating the window, then initializes it directly in exclusive fullscreen mode.
-- This mode bypasses the OS window compositor, minimizing latency and preventing visual artifacts (like title bar flashes) during onset.
+## 📦 Dependencies & Hidden Requirements
 
-### Fixed Resolutions
-- Custom resolutions can be specified via `-res WIDTHxHEIGHT` (e.g., `-res 1920x1080`) or selected from a predefined list in the GUI.
-- If no resolution is specified, the system defaults to 1440x900.
+### SDL3 (The Foundation)
+Gostim2 relies heavily on **SDL3**. Most of the "magic" in timing and cross-platform compatibility comes from SDL3's high-level abstractions over DRM (Linux), CoreAudio (macOS), and WASAPI/DirectX (Windows).
+- **Bindings**: Uses `github.com/Zyko0/go-sdl3`.
+- **CGo**: While the core logic is Go, the SDL3 bindings require CGo for linking against system libraries.
 
-## High-Precision Timing Loop
+### Audio Decoding
+The system supports `.wav`, `.flac`, `.mp3`, and `.ogg`.
+- **Custom Loaders**: Found in `engine/audio_decode.go`.
+- **Resampling**: If a sound's sample rate doesn't match the engine's target (usually 44100Hz), it is automatically resampled during the resource loading phase to prevent real-time performance hits.
 
-The engine is designed for millisecond-level precision using two primary strategies:
+### Serial Triggers (DLP-IO8-G)
+- **Library**: `go.bug.st/serial`.
+- **Logic**: Lines 1, 2, and 3 are hardcoded for specific trigger types:
+    - **Line 1**: IMAGE/VIDEO onset.
+    - **Line 2**: SOUND onset (5ms pulse).
+    - **Line 3**: TEXT/BOX onset.
 
-### VSYNC Mode (Default)
-- Uses a **predictive onset look-ahead** strategy. 
-- The system calculates the target onset time and initiates the draw call a few milliseconds early (defined by `laMS`).
-- SDL3's `SDL_RenderPresent` then waits for the monitor's next vertical refresh cycle (VSYNC) to "flip" the buffer, ensuring no screen tearing and predictable onset.
+## 🛠️ Developer Notes
 
-### VRR Mode (Variable Refresh Rate)
-- Enabled via `--vrr`. Disables VSYNC entirely.
-- Uses a **high-precision busy-wait loop** (`time.Now().UnixMilli()`) to hit the target onset millisecond exactly.
-- This allows VRR-enabled (G-Sync/FreeSync) monitors to update the display immediately upon request, bypassing fixed refresh rate constraints.
+### Config Persistence
+- **`gostim2_config.toml`**: The local cache file for GUI settings. 
+- **`LastDir`**: A critical field for UX; it stores the directory of the last opened file to avoid repetitive navigation.
 
-### Latency Optimization
-- **GC Management:** Garbage collection is disabled (`debug.SetGCPercent(-1)`) just before the experiment starts and re-enabled immediately after to prevent random latency spikes.
-- **Priority:** On supported platforms (Linux console), the application can bypass Wayland/X11 to use the Direct Rendering Manager (DRM) for minimal overhead.
-
-## Stimulus Specifications
-
-### Types & Formatting
-- **IMAGE / TEXT**: Standard single-item stimuli.
-- **BOX**: Multiline text stimulus. Uses `\n` in the `stimuli` column for manual line breaks.
-- **SOUND**: Audio stimuli. The `duration` column is ignored for playback (it plays to completion) but used for onset timing.
-- **STREAMS (IMAGE_STREAM, TEXT_STREAM, SOUND_STREAM)**: 
-    - Supports Rapid Serial Visual Presentation (RSVP).
-    - Format: `item1:duration:gap~item2:duration:gap`.
-    - `gap`: Time (ms) to show a blank/fixation screen between items.
-
-### Event Logging
-Each experiment generates a results file with a comprehensive metadata header including:
-- Subject ID, Date/Time, Refresh Rate, and OS details.
-- Full configuration parameters used during the run.
-
-**Log Columns:**
-- `onset_intended`: Requested onset time from CSV.
-- `onset_actual`: True onset time as measured by the high-precision clock.
-- `offset_actual`: True offset time.
-- `type`, `stimuli`: Stimulus details.
-- `response_key`, `response_time`: User input data.
-- *Any additional columns from the input CSV are preserved.*
-
-## Development & Testing
-
-### Build System
-The `build.sh` script is the primary way to compile the project, as it injects version metadata:
-```bash
-./build.sh
-```
+### Resource Caching
+Resources are pre-loaded in `engine/resources.go` before the experiment starts. This prevents I/O jitters during execution. The `ResourceCache` deduplicates assets used multiple times in a CSV.
 
 ### Testing Strategy
-- **Unit Tests:** `csv_parser_test.go`, `validator_test.go`, and `stream_test.go` cover the critical data ingestion and validation logic.
-- **Manual Verification:** Timing accuracy should be verified using an oscilloscope or high-speed camera for sensitive experiments.
+- **Unit Tests**: Focus on non-GUI logic (parsing, color math, log saving).
+- **Self-Contained Tests**: Use `t.TempDir()` to avoid polluting the workspace.
+- **Pre-existing Failures**: `engine/stream_test.go` was previously broken by a missing file; it has been refactored to be self-contained.
 
-## Platform Support
-- **Linux:** Optimized for TTY console execution (DRM/KMS).
-- **macOS:** Fully supported (Intel & Apple Silicon). Note: Binaries may require `xattr -dr com.apple.quarantine` if downloaded.
-- **Windows:** Fully supported. Includes a PowerShell installer (`install-windows.ps1`) for easy setup in `C:\Program Files`.
+## ⚠️ Known Constraints
+- **No Real-time Feedback**: The architecture does not support branching or feedback based on user input.
+- **Memory Usage**: Since all resources are pre-loaded, experiments with many large videos or images may require significant RAM.

@@ -1,0 +1,33 @@
+# gostim2 version: v0.1.1-1-gdf321bc (Go version)
+# Author: Christophe Pallier <christophe@pallier.org>
+# License: GPLv3
+# GitHub: https://github.com/chrplr/gostim2
+# SDL Version: 3.4.0
+# Platform: linux
+# Hostname: is158520
+# Username: cp983411
+# Video Driver: wayland
+# Audio Driver: pipewire
+# Audio Sample Rate: 44100 Hz
+# Renderer: opengl
+# Display Mode: 3840x2160 @ 60.00Hz (Physical)
+# Logical Resolution: 1920x1080
+# Font: /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf
+# Font Size: 50
+# Start Date: 2026-03-18 09:48:11.637
+# End Date: 2026-03-18 09:48:28.710
+# Completion Status: Aborted (ESC or Quit)
+# Command Line: ../../gostim2-gui
+subject_id	intended_ms	actual_ms	type	label	onset_time	duration	type	stimuli
+unknown	1000	996	SOUND_ONSET	LaCigaleEtLaFourmi_titre.flac	1000	1	SOUND	LaCigaleEtLaFourmi_titre.flac
+unknown	8500	8499	TEXT_ONSET	La Cigale, ayant chanté tout l’été,	8500	1250	TEXT	La Cigale, ayant chanté tout l’été,
+unknown	9750	9749	TEXT_OFFSET	La Cigale, ayant chanté tout l’été,	8500	1250	TEXT	La Cigale, ayant chanté tout l’été,
+unknown	10000	10000	TEXT_ONSET	Se trouva fort dépourvue	10000	1250	TEXT	Se trouva fort dépourvue
+unknown	11250	11266	TEXT_OFFSET	Se trouva fort dépourvue	10000	1250	TEXT	Se trouva fort dépourvue
+unknown	11500	11500	TEXT_ONSET	Quand la bise fut venue :	11500	1250	TEXT	Quand la bise fut venue :
+unknown	12750	12750	TEXT_OFFSET	Quand la bise fut venue :	11500	1250	TEXT	Quand la bise fut venue :
+unknown	13000	13001	TEXT_ONSET	Pas un seul petit  morceau	13000	1250	TEXT	Pas un seul petit  morceau
+unknown	14250	14251	TEXT_OFFSET	Pas un seul petit  morceau	13000	1250	TEXT	Pas un seul petit  morceau
+unknown	14500	14501	TEXT_ONSET	De mouche ou  de vermisseau.	14500	1250	TEXT	De mouche ou  de vermisseau.
+unknown	15750	15767	TEXT_OFFSET	De mouche ou  de vermisseau.	14500	1250	TEXT	De mouche ou  de vermisseau.
+unknown	16000	16001	TEXT_ONSET	Elle alla crier famine	16000	1250	TEXT	Elle alla crier famine

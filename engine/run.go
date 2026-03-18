@@ -95,6 +95,16 @@ func Run(cfg *Config) (string, error) {
 		return "", fmt.Errorf("failed to load experiment: %v", err)
 	}
 
+	if cfg.StimuliDir == "" {
+		csvDir := filepath.Dir(cfg.CSVFile)
+		for _, candidate := range []string{"stimuli", "assets"} {
+			if info, err := os.Stat(filepath.Join(csvDir, candidate)); err == nil && info.IsDir() {
+				cfg.StimuliDir = filepath.Join(csvDir, candidate)
+				break
+			}
+		}
+	}
+
 	validationErrs := ValidateExperiment(exp, cfg.StimuliDir)
 	if len(validationErrs) > 0 {
 		return "", fmt.Errorf("experiment configuration contains %d errors (first: %v)", len(validationErrs), validationErrs[0])
@@ -108,7 +118,7 @@ func Run(cfg *Config) (string, error) {
 	cache := NewResourceCache()
 	defer cache.Destroy()
 
-	resources, err := cache.Load(renderer, exp, font, cfg.TextColor, cfg.StimuliDir)
+	resources, warnings, err := cache.Load(renderer, exp, font, cfg.TextColor, cfg.StimuliDir)
 	if err != nil {
 		return "", fmt.Errorf("failed to load resources: %v", err)
 	}
@@ -173,7 +183,9 @@ func Run(cfg *Config) (string, error) {
 		Username:          username,
 		VideoDriver:       sdl.GetCurrentVideoDriver(),
 		AudioDriver:       sdl.GetCurrentAudioDriver(),
+		AudioSampleRate:   int(DefaultAudioSpec().Freq),
 		Renderer:          rendererName,
+		Warnings:          warnings,
 		DisplayMode:       displayModeStr,
 		LogicalResolution: fmt.Sprintf("%dx%d", cfg.ScreenWidth, cfg.ScreenHeight),
 		Font:              cfg.FontFile,
@@ -202,15 +214,25 @@ func Run(cfg *Config) (string, error) {
 
 	log.EndTime = time.Now().Format("2006-01-02 15:04:05.000")
 
-	outputName := cfg.OutputFile
-	if outputName == "" {
-		// Construct default output filename based on input CSV basename and subject ID
-		baseName := filepath.Base(cfg.CSVFile)
-		ext := filepath.Ext(baseName)
-		baseName = strings.TrimSuffix(baseName, ext)
+	baseName := filepath.Base(cfg.CSVFile)
+	baseName = strings.TrimSuffix(baseName, filepath.Ext(baseName))
+	timestamp := time.Now().Format("20060102-150405")
+	outputName := fmt.Sprintf("%s_sub-%s_%s.tsv", baseName, subjID, timestamp)
 
-		timestamp := time.Now().Format("20060102-150405")
-		outputName = fmt.Sprintf("%s_sub-%s_%s.csv", baseName, subjID, timestamp)
+	// Determine final results directory relative to CSV if not absolute
+	finalResultsDir := cfg.ResultsDir
+	if !filepath.IsAbs(finalResultsDir) && cfg.CSVFile != "" {
+		finalResultsDir = filepath.Join(filepath.Dir(cfg.CSVFile), finalResultsDir)
+	}
+
+	if finalResultsDir != "" {
+		if err := os.MkdirAll(finalResultsDir, 0755); err != nil {
+			return "", fmt.Errorf("failed to create results directory %s: %v", finalResultsDir, err)
+		}
+		outputName = filepath.Join(finalResultsDir, outputName)
+	} else if cfg.CSVFile != "" {
+		// Fallback to CSV directory if ResultsDir is empty
+		outputName = filepath.Join(filepath.Dir(cfg.CSVFile), outputName)
 	}
 
 	if err := log.Save(outputName); err != nil {

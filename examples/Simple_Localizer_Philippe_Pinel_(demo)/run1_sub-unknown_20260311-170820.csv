@@ -1,0 +1,32 @@
+# expe3000 version: v0.8.4 (Go version)
+# Author: Christophe Pallier <christophe@pallier.org>
+# License: GPLv3
+# GitHub: https://github.com/chrplr/expe3000
+# SDL Version: 3.4.0
+# Platform: linux
+# Hostname: is158520
+# Username: cp983411
+# Video Driver: wayland
+# Audio Driver: pipewire
+# Renderer: opengl
+# Display Mode: 2560x1440 @ 60.00Hz (Physical)
+# Logical Resolution: 1440x900
+# Font: /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf
+# Font Size: 50
+# Start Date: 2026-03-11 17:08:06.011
+# End Date: 2026-03-11 17:08:20.253
+# Completion Status: Aborted (ESC or Quit)
+# Command Line: expe3000 run1.tsv
+subject_id	intended_ms	actual_ms	type	label	onset_time	duration	type	cond	stimuli
+unknown	0	0	TEXT_STREAM_ONSET	calculez~seize~moins~huit	0	400	TEXT_STREAM	calculvideo	calculez~seize~moins~huit
+unknown	1600	1614	TEXT_STREAM_OFFSET	calculez~seize~moins~huit	0	400	TEXT_STREAM	calculvideo	calculez~seize~moins~huit
+unknown	2400	2400	TEXT_STREAM_ONSET	calculez~dix~moins~deux	2400	400	TEXT_STREAM	calculvideo	calculez~dix~moins~deux
+unknown	4000	4002	TEXT_STREAM_OFFSET	calculez~dix~moins~deux	2400	400	TEXT_STREAM	calculvideo	calculez~dix~moins~deux
+unknown	8700	8705	IMAGE_STREAM_ONSET	checkerboard_hpb.bmp~checkerboard_hnb.bmp~checkerboard_hpb.bmp~checkerboard_hnb.bmp~checkerboard_hpb.bmp~checkerboard_hnb.bmp	8700	400	IMAGE_STREAM	CheckboardH	checkerboard_hpb.bmp~checkerboard_hnb.bmp~checkerboard_hpb.bmp~checkerboard_hnb.bmp~checkerboard_hpb.bmp~checkerboard_hnb.bmp
+unknown	11100	11105	IMAGE_STREAM_OFFSET	checkerboard_hpb.bmp~checkerboard_hnb.bmp~checkerboard_hpb.bmp~checkerboard_hnb.bmp~checkerboard_hpb.bmp~checkerboard_hnb.bmp	8700	400	IMAGE_STREAM	CheckboardH	checkerboard_hpb.bmp~checkerboard_hnb.bmp~checkerboard_hpb.bmp~checkerboard_hnb.bmp~checkerboard_hpb.bmp~checkerboard_hnb.bmp
+unknown	11400	11405	SOUND_ONSET	clic3D.wav	11400	400	SOUND	clicDaudio	clic3D.wav
+unknown	11605	11605	RESPONSE	Space	11400	400	SOUND	clicDaudio	clic3D.wav
+unknown	13254	13254	RESPONSE	H	11400	400	SOUND	clicDaudio	clic3D.wav
+unknown	13438	13438	RESPONSE	H	11400	400	SOUND	clicDaudio	clic3D.wav
+unknown	13605	13605	RESPONSE	H	11400	400	SOUND	clicDaudio	clic3D.wav
+unknown	13787	13787	RESPONSE	H	11400	400	SOUND	clicDaudio	clic3D.wav

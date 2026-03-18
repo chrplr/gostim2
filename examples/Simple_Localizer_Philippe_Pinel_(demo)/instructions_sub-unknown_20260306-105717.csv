@@ -1,0 +1,26 @@
+# expe3000 version: v0.5.6-4-g8e95f00 (Go version)
+# Author: Christophe Pallier <christophe@pallier.org>
+# License: GPLv3
+# GitHub: https://github.com/chrplr/expe3000
+# SDL Version: 3.4.0
+# Platform: linux
+# Hostname: is154920
+# Username: cp983411
+# Video Driver: x11
+# Audio Driver: pulseaudio
+# Renderer: opengl
+# Display Mode: 3840x2160 @ 59.98Hz (Physical)
+# Logical Resolution: 1440x900
+# Font: /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf
+# Font Size: 50
+# Start Date: 2026-03-06 10:57:14.165
+# End Date: 2026-03-06 10:57:17.374
+# Completion Status: Aborted (ESC or Quit)
+# Command Line: expe3000 -csv instructions.tsv
+subject_id	intended_ms	actual_ms	type	label	onset_time	duration	type	stimuli
+unknown	0	0	BOX_ONSET	"Attention ! 
+ les intructions vont 
+défiler automatiquement 
+et rapidement.
+ Restez attentif ..."	0	4000	BOX	Attention ! \n les intructions vont \ndéfiler automatiquement \net rapidement.\n Restez attentif ...
+unknown	924	924	RESPONSE	Space	0	4000	BOX	Attention ! \n les intructions vont \ndéfiler automatiquement \net rapidement.\n Restez attentif ...

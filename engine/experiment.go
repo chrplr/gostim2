@@ -34,12 +34,14 @@ type EventLog struct {
 	Username          string
 	VideoDriver       string
 	AudioDriver       string
+	AudioSampleRate   int
 	Renderer          string
 	DisplayMode       string
 	LogicalResolution string
 	Font              string
 	FontSize          int
 	CommandLine       string
+	Warnings          []string
 }
 
 func (l *EventLog) Log(intended, actual uint64, stype, label string, stimulusRow []string) {
@@ -74,6 +76,7 @@ func (l *EventLog) Save(path string) error {
 		{"# Username: " + l.Username},
 		{"# Video Driver: " + l.VideoDriver},
 		{"# Audio Driver: " + l.AudioDriver},
+		{"# Audio Sample Rate: " + strconv.Itoa(l.AudioSampleRate) + " Hz"},
 		{"# Renderer: " + l.Renderer},
 	}
 	if l.DisplayMode != "" {
@@ -96,6 +99,9 @@ func (l *EventLog) Save(path string) error {
 	}
 	metadata = append(metadata, []string{"# Completion Status: " + completedStr})
 	metadata = append(metadata, []string{"# Command Line: " + l.CommandLine})
+	for _, w := range l.Warnings {
+		metadata = append(metadata, []string{"# Warning: " + w})
+	}
 
 	for _, m := range metadata {
 		w.Write(m)
