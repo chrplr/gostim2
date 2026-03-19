@@ -5,8 +5,6 @@ Gostim2 is a multimedia stimulus delivery system designed for experimental psych
 * [HTML version of this document](http://chrplr.github.io/gostim2)  
 * [Github repository](http://github.com/chrplr/gostim2)
 
-![](gui.png)
-
 
 Building and running an experiment with gostim2 does not require any programming knowledge as *the experimental paradigm is fully described in a table that describes the stimuli and their timing.*
 Indeed, Gostim2 is meant for expriments where the stimuli are presented according to a *fixed schedule, known in advance*. Although all keypress events are saved with timestamps, the behavior of the program cannot be modified in real-time, e.g., it is not possible to provide real-time feedback. Gostim2 has no notion of "trial", only stimuli and events. This approach is well suited for fMRI/MEG/EEG experiments with fixed stimulus presentation schedules.
@@ -17,6 +15,11 @@ Christophe Pallier Feb. 2026
 
 ---
 
+Here is a preview of the graphical interface (see below for explanations)
+
+![](gui.png)
+
+---
 ## Table of Contents
 - [Usage](#usage)
   - [Quick Start](#quick-start)
