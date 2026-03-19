@@ -2,7 +2,7 @@
 
 Gostim2 is a multimedia stimulus delivery system designed for experimental psychology and cognitive neuroscience tasks.
 
-* [HTML version] (http://chrplr.github.io/gostim2) of this document  
+* [HTML version](http://chrplr.github.io/gostim2) of this document  
 * [Github repository](http://github.com/chrplr/gostim2) of this project
 * [Installers](https://github.com/chrplr/gostim2/releases) for various platforms
 
