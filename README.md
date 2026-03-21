@@ -153,9 +153,11 @@ If you just want to run the application, the easiest way is to download a pre-bu
 2.  **Choose your installer (Easiest):**
     -   **Windows:** Download **`gostim2-setup.exe`**. Run it to install the app. It installs to your local `AppData` folder (no admin rights required) and creates desktop shortcuts.
         - *Note: The **examples** folder is installed in `%LOCALAPPDATA%\gostim2\examples` (usually `C:\Users\<YourName>\AppData\Local\gostim2\examples`).*
-    -   **macOS:** Download **`gostim2-macos-installer.dmg`**. Open it and drag all the files into a single `gostim2` folder in your Applications folder. Provide correct permissions with:
-                chmod +x /Applications/gostim2/gostim2-gui
-                chmod +x /Applications/gostim2/gostim2
+    -   **macOS:** Download **`gostim2-macos-arm64.zip`**. Extract it and drag **gostim2.app** to your Applications folder (or anywhere you like).
+
+        > [!WARNING]
+        > macOS may show a security warning the first time you open the app. See [macOS installation and security](https://chrplr.github.io/note-about-macos-unsigned-apps) for an explanation and step-by-step instructions to bypass it.
+
 
     -   **Linux (Universal):** Download **`gostim2-x86_64.AppImage`**. Right-click the file, go to **Properties > Permissions**, check **"Allow executing file as program"**, and double-click to run.
     -   **Ubuntu/Debian:** Download the **`.deb`** file (choose `amd64`) and install it by double-clicking or running `sudo apt install ./gostim2_*.deb`.

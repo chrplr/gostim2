@@ -271,28 +271,51 @@ jobs:
         with:
           name: bin-macos-arm64
           path: build_tmp
-      - name: Create DMG
+      - name: Create macOS App Bundle (zip)
         run: |
-          brew install create-dmg
-          mkdir -p dist_dmg
           bin_dir=$(find build_tmp -maxdepth 1 -type d -name "gostim2-*" | head -n 1)
-          cp -r "$bin_dir"/* dist_dmg/
-          chmod +x dist_dmg/gostim2*
-          create-dmg \
-            --volname "gostim2" \
-            --window-pos 200 120 \
-            --window-size 800 400 \
-            --icon-size 100 \
-            --icon "gostim2-gui" 200 190 \
-            --hide-extension "gostim2-gui" \
-            --app-drop-link 600 185 \
-            "gostim2-macos-installer.dmg" \
-            "dist_dmg/"
-      - name: Upload macOS DMG
+          VERSION=$(basename "$bin_dir" | sed 's/gostim2-\(.*\)-macos-.*/\1/')
+
+          # Build .app bundle
+          APP_NAME="gostim2.app"
+          mkdir -p "$APP_NAME/Contents/MacOS"
+          mkdir -p "$APP_NAME/Contents/Resources"
+          cp "$bin_dir/gostim2-gui" "$APP_NAME/Contents/MacOS/gostim2"
+          chmod +x "$APP_NAME/Contents/MacOS/gostim2"
+
+          # Copy CLI alongside the .app (inside the zip)
+          cp "$bin_dir/gostim2" gostim2-cli
+
+          # Info.plist
+          cat <<EOF > "$APP_NAME/Contents/Info.plist"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>gostim2</string>
+              <key>CFBundleIdentifier</key>
+              <string>org.pallier.gostim2</string>
+              <key>CFBundleName</key>
+              <string>gostim2</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleShortVersionString</key>
+              <string>$VERSION</string>
+          </dict>
+          </plist>
+          EOF
+
+          # Ad-hoc sign to prevent macOS Gatekeeper "damaged" error
+          codesign --force --deep --sign - "$APP_NAME"
+
+          # Zip the .app and CLI so users can extract and drag the app wherever they want
+          zip -r "gostim2-macos-arm64.zip" "$APP_NAME" gostim2-cli
+      - name: Upload macOS App Bundle
         uses: actions/upload-artifact@v4
         with:
           name: installer-macos
-          path: gostim2-macos-installer.dmg
+          path: gostim2-macos-arm64.zip
 
   release:
     name: Create Release
@@ -314,7 +337,7 @@ jobs:
             release_artifacts/gostim2-*.zip
             release_artifacts/gostim2-*.tar.gz
             release_artifacts/gostim2-setup.exe
-            release_artifacts/gostim2-macos-installer.dmg
+            release_artifacts/gostim2-macos-arm64.zip
             release_artifacts/*.deb
             release_artifacts/*.AppImage
           generate_release_notes: true
