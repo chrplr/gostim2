@@ -149,24 +149,23 @@ onset_time,duration,type,stimuli
 
 If you just want to run the application, the easiest way is to download a pre-built version for your computer.
 
-1.  **Download:** Go to the [GitHub Releases](https://github.com/chrplr/gostim2/releases) page.
-2.  **Choose your installer (Easiest):**
-    -   **Windows:** Download **`gostim2-setup.exe`**. Run it to install the app. It installs to your local `AppData` folder (no admin rights required) and creates desktop shortcuts.
+1.  **Choose your installer (Easiest):**
+    -   **Windows:** Download [gostim2-setup.exe](https://github.com/chrplr/gostim2/releases/latest/download/gostim2-setup.exe). Run it to install the app. It installs to your local `AppData` folder (no admin rights required) and creates desktop shortcuts.
         - *Note: The **examples** folder is installed in `%LOCALAPPDATA%\gostim2\examples` (usually `C:\Users\<YourName>\AppData\Local\gostim2\examples`).*
-    -   **macOS:** Download **`gostim2-macos-arm64.zip`**. Extract it and drag **gostim2.app** to your Applications folder (or anywhere you like).
+    -   **macOS (Apple Silicon/M1/M2):** Download [gostim2-macos-arm64-app.zip](https://github.com/chrplr/gostim2/releases/latest/download/gostim2-macos-arm64-app.zip). Extract it and drag **gostim2.app** to your Applications folder (or anywhere you like).
 
         > [!WARNING]
         > macOS may show a security warning the first time you open the app. See [macOS installation and security](https://chrplr.github.io/note-about-macos-unsigned-apps) for an explanation and step-by-step instructions to bypass it.
 
-
-    -   **Linux (Universal):** Download **`gostim2-x86_64.AppImage`**. Right-click the file, go to **Properties > Permissions**, check **"Allow executing file as program"**, and double-click to run.
-    -   **Ubuntu/Debian:** Download the **`.deb`** file (choose `amd64`) and install it by double-clicking or running `sudo apt install ./gostim2_*.deb`.
-3.  **Alternative: Raw Binaries:** If you prefer not to use an installer, you can download the `.zip` (Windows) or `.tar.gz` (Linux/macOS) files matching your processor:
-    -   **Windows:** `windows` and `x86_64`.
-    -   **macOS (Apple Silicon/M1/M2):** `macos` and `arm64`.
-    -   **macOS (Intel):** `macos` and `x86_64`.
-    -   **Linux (PC/Intel):** `linux` and `x86_64`.
-4.  **Run:** Once installed or downloaded, you can run the application (you may need to grant permission in your security settings on macOS).
+    -   **Linux (Universal):** Download [gostim2-linux-x86_64.AppImage](https://github.com/chrplr/gostim2/releases/latest/download/gostim2-linux-x86_64.AppImage). Right-click the file, go to **Properties > Permissions**, check **"Allow executing file as program"**, and double-click to run.
+    -   **Ubuntu/Debian:** Download [gostim2-linux-x86_64.deb](https://github.com/chrplr/gostim2/releases/latest/download/gostim2-linux-x86_64.deb) and install it by double-clicking or running `sudo apt install ./gostim2-linux-x86_64.deb`.
+2.  **Alternative: Raw Binaries:** If you prefer not to use an installer, download the `.zip` (Windows) or `.tar.gz` (Linux/macOS) from the [GitHub Releases](https://github.com/chrplr/gostim2/releases) page matching your platform:
+    -   **Windows x86_64:** `gostim2-vVERSION-windows-x86_64.zip`
+    -   **Windows ARM64:** `gostim2-vVERSION-windows-arm64.zip`
+    -   **macOS (Apple Silicon/M1/M2):** `gostim2-vVERSION-macos-arm64.tar.gz`
+    -   **macOS (Intel):** `gostim2-vVERSION-macos-x86_64.tar.gz`
+    -   **Linux (PC/Intel):** `gostim2-vVERSION-linux-x86_64.tar.gz`
+3.  **Run:** Once installed or downloaded, you can run the application (you may need to grant permission in your security settings on macOS).
 
 ### Building from Source
 

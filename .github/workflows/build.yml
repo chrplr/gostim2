@@ -65,7 +65,7 @@ jobs:
           fi
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -ldflags "$GUI_LDFLAGS" -o dist/gostim2-gui${{ matrix.extension }} ./cmd/gostim2-gui
 
-          ARCHIVE_NAME=gostim2-$VERSION-${{ matrix.artifact_os }}-${{ matrix.artifact_arch }}-binary
+          ARCHIVE_NAME=gostim2-$VERSION-${{ matrix.artifact_os }}-${{ matrix.artifact_arch }}
           mkdir -p $ARCHIVE_NAME
           cp dist/gostim2${{ matrix.extension }} $ARCHIVE_NAME/
           cp dist/gostim2-gui${{ matrix.extension }} $ARCHIVE_NAME/
@@ -135,7 +135,7 @@ jobs:
           Maintainer: Christophe Pallier <christophe@pallier.org>
           Description: Multimedia stimulus delivery system for neuroscience and psychology.
           EOF
-          dpkg-deb --build deb gostim2_${VERSION}_${{ matrix.deb_arch }}.deb
+          dpkg-deb --build deb gostim2-linux-${{ matrix.arch }}.deb
 
           # 3. AppImage preparation
           mkdir -p AppDir/usr/bin AppDir/usr/share/gostim2
@@ -167,7 +167,7 @@ jobs:
           # Using -n to skip AppStream check (common in cross-arch builds)
           # We use the extracted AppRun to ensure the environment is set up correctly for the tool itself
           echo "Packaging for ARCH: ${{ matrix.appimage_arch }}"
-          ARCH=${{ matrix.appimage_arch }} ./squashfs-root/AppRun -n AppDir gostim2-${{ matrix.arch }}.AppImage
+          ARCH=${{ matrix.appimage_arch }} ./squashfs-root/AppRun -n AppDir gostim2-linux-${{ matrix.appimage_arch }}.AppImage
       - name: Upload Linux Packages
         uses: actions/upload-artifact@v4
         with:
@@ -310,12 +310,12 @@ jobs:
           codesign --force --deep --sign - "$APP_NAME"
 
           # Zip the .app and CLI so users can extract and drag the app wherever they want
-          zip -r "gostim2-macos-arm64.zip" "$APP_NAME" gostim2-cli
+          zip -r "gostim2-macos-arm64-app.zip" "$APP_NAME" gostim2-cli
       - name: Upload macOS App Bundle
         uses: actions/upload-artifact@v4
         with:
           name: installer-macos
-          path: gostim2-macos-arm64.zip
+          path: gostim2-macos-arm64-app.zip
 
   release:
     name: Create Release
@@ -337,7 +337,7 @@ jobs:
             release_artifacts/gostim2-*.zip
             release_artifacts/gostim2-*.tar.gz
             release_artifacts/gostim2-setup.exe
-            release_artifacts/gostim2-macos-arm64.zip
+            release_artifacts/gostim2-macos-arm64-app.zip
             release_artifacts/*.deb
             release_artifacts/*.AppImage
           generate_release_notes: true
