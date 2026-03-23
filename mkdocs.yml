@@ -1,0 +1,35 @@
+site_name: Gostim2
+site_description: User guide for the Gostim2 stimulus delivery system
+site_author: Christophe Pallier
+site_url: https://chrplr.github.io/gostim2
+repo_url: https://github.com/chrplr/gostim2
+
+docs_dir: docs
+site_dir: site
+
+nav:
+  - User Guide: UserGuide-Gostim2.md
+
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - tables
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - toc:
+      permalink: true
+
+plugins:
+  - search

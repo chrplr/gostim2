@@ -10,7 +10,7 @@ DIST       := dist
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build build-multiplatform clean test fmt vet run run-gui install
+.PHONY: help build build-multiplatform clean test fmt vet run run-gui install docs-install docs-html docs-pdf docs-serve
 
 ## help: Show this help message
 help:
@@ -73,6 +73,31 @@ run:
 ## run-gui: Run the GUI (pass ARGS="..." to supply arguments)
 run-gui:
 	go run -ldflags "$(LDFLAGS)" ./cmd/gostim2-gui $(ARGS)
+
+## docs-install: Install mkdocs and documentation dependencies
+docs-install:
+	pip install -r docs/requirements.txt
+
+## docs-html: Build HTML documentation into site/
+docs-html:
+	mkdocs build
+
+## docs-pdf: Build PDF documentation (gostim2-userguide.pdf) using pandoc+xelatex
+docs-pdf:
+	pandoc docs/UserGuide-Gostim2.md \
+		--pdf-engine=xelatex \
+		--variable geometry:margin=2.5cm \
+		--variable fontsize=11pt \
+		--variable colorlinks=true \
+		--variable linkcolor=blue \
+		--toc \
+		--metadata title="Gostim2 User Guide" \
+		--metadata author="Christophe Pallier" \
+		-o gostim2-userguide.pdf
+
+## docs-serve: Serve documentation locally at http://127.0.0.1:8000
+docs-serve:
+	mkdocs serve
 
 ## clean: Remove built binaries and dist/
 clean:
