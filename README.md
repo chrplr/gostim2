@@ -178,13 +178,7 @@ Do this only if you want to compile the project on your computer. This is the wa
 - **SDL3 libraries**: 
   - **Windows**: DLLs are typically bundled with releases.
   - **macOS**: `brew install sdl3 sdl3_image sdl3_ttf`
-  - **Linux**: Install `sdl3`, `sdl3_image`, and `sdl3_ttf` via your package manager.
-
-> [!WARNING]
-> **Ubuntu 24.04 users (building from source):** SDL3 runtime/dev packages are not available in standard Noble repositories, so commands like `apt install libsdl3-0 libsdl3-image-0 libsdl3-ttf-0` fail with "Unable to locate package".
->
-> For source builds on Ubuntu 24.04, build/install SDL3, SDL3_image, and SDL3_ttf from upstream first (see [SDL3](https://github.com/libsdl-org/SDL), [SDL3_image](https://github.com/libsdl-org/SDL_image), and [SDL3_ttf](https://github.com/libsdl-org/SDL_ttf)).
-
+  - **Linux**: Good news, `sdl3`, `sdl3_image`, and `sdl3_ttf` are pre-bundled with Go.
 
 
 To see all available build targets:
