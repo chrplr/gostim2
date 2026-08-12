@@ -5,3 +5,6 @@ gostim2-results/
 /gostim2
 /gostim2-gui
 gostim2_config.toml
+
+# LibreOffice lock files, created when a .tsv/.csv is open in an editor
+.~lock.*#
