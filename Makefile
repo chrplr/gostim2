@@ -40,6 +40,7 @@ build-multiplatform:
 		mkdir -p $$dir; \
 		GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o $$dir/gostim2$$ext ./cmd/gostim2 || exit 1; \
 		GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 go build -ldflags "$$gui_ldflags" -o $$dir/gostim2-gui$$ext ./cmd/gostim2-gui || exit 1; \
+		cp LICENSE.txt NOTICE $$dir/ || exit 1; \
 	done
 	@echo "All builds written to $(DIST)/"
 

@@ -2,7 +2,7 @@
 
 **Version**: 0.2.0
 **Author**: Christophe Pallier
-**License**: GNU General Public License v3
+**License**: Apache License 2.0
 
 ---
 
@@ -462,4 +462,4 @@ Author: [Christophe Pallier](http://www.pallier.org) <christophe@pallier.org>
 
 Source code: <https://github.com/chrplr/gostim2>
 
-Distributed under the [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html).
+Distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).

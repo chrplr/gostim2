@@ -70,6 +70,8 @@ jobs:
           cp dist/gostim2${{ matrix.extension }} $ARCHIVE_NAME/
           cp dist/gostim2-gui${{ matrix.extension }} $ARCHIVE_NAME/
           cp README.md $ARCHIVE_NAME/README.txt 2>/dev/null || true
+          cp LICENSE.txt $ARCHIVE_NAME/
+          cp NOTICE $ARCHIVE_NAME/
           if [ -d "examples" ]; then cp -r examples $ARCHIVE_NAME/; fi
           
           if [ "${{ matrix.goos }}" == "windows" ]; then

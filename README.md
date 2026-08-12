@@ -255,5 +255,5 @@ To run `gostim2` or `gostim2-gui` from any terminal window without typing their 
 
 Author: [Christophe Pallier](http://www.pallier.org) <christophe@pallier.org> using Gemini CLI and Claude.
 
-The code is distributed under the [GNU General Public License v3](LICENSE.txt).
+The code is distributed under the [Apache License 2.0](LICENSE.txt).
 
