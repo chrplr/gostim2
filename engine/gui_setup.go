@@ -29,20 +29,30 @@ import (
 	"github.com/Zyko0/go-sdl3/ttf"
 )
 
-
 func getTargetField(focusBox int, cfg *Config, configFilePath, displayStr, fontSizeStr, fixColorEditStr *string) *string {
 	switch focusBox {
-	case 0: return configFilePath
-	case 1: return &cfg.SubjectID
-	case 2: return &cfg.CSVFile
-	case 3: return &cfg.StartSplash
-	case 4: return &cfg.FontFile
-	case 5: return &cfg.ResultsDir
-	case 6: return &cfg.DLPDevice
-	case 7: return displayStr
-	case 8: return fontSizeStr
-	case 9: return fixColorEditStr
-	default: return nil
+	case 0:
+		return configFilePath
+	case 1:
+		return &cfg.SubjectID
+	case 2:
+		return &cfg.CSVFile
+	case 3:
+		return &cfg.StartSplash
+	case 4:
+		return &cfg.FontFile
+	case 5:
+		return &cfg.ResultsDir
+	case 6:
+		return &cfg.DLPDevice
+	case 7:
+		return displayStr
+	case 8:
+		return fontSizeStr
+	case 9:
+		return fixColorEditStr
+	default:
+		return nil
 	}
 }
 
@@ -673,16 +683,26 @@ func RunGuiSetup(cfg *Config) bool {
 		for i, label := range col1Labels {
 			text := ""
 			switch i {
-			case 0: text = configFilePath
-			case 1: text = cfg.SubjectID
-			case 2: text = cfg.CSVFile
-			case 3: text = cfg.StartSplash
-			case 4: text = cfg.FontFile
-			case 5: text = cfg.ResultsDir
-			case 6: text = cfg.DLPDevice
-			case 7: text = displayStr
-			case 8: text = fontSizeStr
-			case 9: text = fixColorEditStr
+			case 0:
+				text = configFilePath
+			case 1:
+				text = cfg.SubjectID
+			case 2:
+				text = cfg.CSVFile
+			case 3:
+				text = cfg.StartSplash
+			case 4:
+				text = cfg.FontFile
+			case 5:
+				text = cfg.ResultsDir
+			case 6:
+				text = cfg.DLPDevice
+			case 7:
+				text = displayStr
+			case 8:
+				text = fontSizeStr
+			case 9:
+				text = fixColorEditStr
 			}
 			renderInputBox(renderer, guiFont, label, text, C1X, float32(40+i*RowSpacing), BoxW, BoxH, focusBox == i, col1ShowBrowse[i])
 		}

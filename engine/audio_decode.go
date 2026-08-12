@@ -24,10 +24,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Zyko0/go-sdl3/sdl"
 	mp3dec "github.com/hajimehoshi/go-mp3"
 	"github.com/jfreymuth/oggvorbis"
 	"github.com/mewkiz/flac"
-	"github.com/Zyko0/go-sdl3/sdl"
 )
 
 // loadAudioFile reads an audio file and returns its PCM data as S16LE bytes

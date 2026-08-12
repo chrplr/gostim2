@@ -28,11 +28,11 @@ import (
 	"gostim2/engine"
 	"gostim2/internal/version"
 
-	"github.com/Zyko0/go-sdl3/sdl"
-	"github.com/Zyko0/go-sdl3/ttf"
 	"github.com/Zyko0/go-sdl3/bin/binimg"
 	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/bin/binttf"
+	"github.com/Zyko0/go-sdl3/sdl"
+	"github.com/Zyko0/go-sdl3/ttf"
 )
 
 func init() {
@@ -66,33 +66,33 @@ func main() {
 	}
 
 	showVersion := flag.Bool("version", false, "Print version info and exit")
-	configFile  := flag.String("config", "", "Load parameters from a TOML config file (e.g. gostim2_config.toml)")
-	csvFile     := flag.String("csv", cfg.CSVFile, "Stimulus CSV/TSV file")
-	tsvFile     := flag.String("tsv", "", "Stimulus TSV file (alias for -csv)")
-	subjectID   := flag.String("subject", cfg.SubjectID, "Subject ID")
-	resultsDir  := flag.String("results-dir", cfg.ResultsDir, "Directory where result files are saved")
-	stimuliDir  := flag.String("stimuli-dir", cfg.StimuliDir, "Directory containing stimuli")
-	assetsDir   := flag.String("assets", "", "Directory containing stimuli (alias for -stimuli-dir)")
+	configFile := flag.String("config", "", "Load parameters from a TOML config file (e.g. gostim2_config.toml)")
+	csvFile := flag.String("csv", cfg.CSVFile, "Stimulus CSV/TSV file")
+	tsvFile := flag.String("tsv", "", "Stimulus TSV file (alias for -csv)")
+	subjectID := flag.String("subject", cfg.SubjectID, "Subject ID")
+	resultsDir := flag.String("results-dir", cfg.ResultsDir, "Directory where result files are saved")
+	stimuliDir := flag.String("stimuli-dir", cfg.StimuliDir, "Directory containing stimuli")
+	assetsDir := flag.String("assets", "", "Directory containing stimuli (alias for -stimuli-dir)")
 	startSplash := flag.String("start-splash", cfg.StartSplash, "Start splash image")
-	endSplash   := flag.String("end-splash", cfg.EndSplash, "End splash image")
-	fontFile    := flag.String("font", cfg.FontFile, "TTF font file")
-	fontSize    := flag.Int("font-size", cfg.FontSize, "Font size")
-	dlpDevice   := flag.String("dlp", cfg.DLPDevice, "DLP-IO8-G device")
-	res         := flag.String("res", "", "Screen resolution (e.g. 1920x1080 or Autodetect)")
-	screenW     := flag.Int("width", cfg.ScreenWidth, "Screen width")
-	screenH     := flag.Int("height", cfg.ScreenHeight, "Screen height")
-	displayIdx  := flag.Int("display", cfg.DisplayIndex, "Display index")
+	endSplash := flag.String("end-splash", cfg.EndSplash, "End splash image")
+	fontFile := flag.String("font", cfg.FontFile, "TTF font file")
+	fontSize := flag.Int("font-size", cfg.FontSize, "Font size")
+	dlpDevice := flag.String("dlp", cfg.DLPDevice, "DLP-IO8-G device")
+	res := flag.String("res", "", "Screen resolution (e.g. 1920x1080 or Autodetect)")
+	screenW := flag.Int("width", cfg.ScreenWidth, "Screen width")
+	screenH := flag.Int("height", cfg.ScreenHeight, "Screen height")
+	displayIdx := flag.Int("display", cfg.DisplayIndex, "Display index")
 	scaleFactor := flag.Float64("scale", float64(cfg.ScaleFactor), "Scale factor for stimuli")
-	noVSync     := flag.Bool("no-vsync", false, "Disable VSync")
-	noFixation      := flag.Bool("no-fixation", cfg.FixationMode == 0, "Never show fixation cross")
-	fixationAlways  := flag.Bool("fixation-always", cfg.FixationMode == 2, "Show fixation cross superimposed on stimuli")
-	fullscreen        := flag.Bool("fullscreen", cfg.WindowMode == 2, "Enable exclusive fullscreen")
+	noVSync := flag.Bool("no-vsync", false, "Disable VSync")
+	noFixation := flag.Bool("no-fixation", cfg.FixationMode == 0, "Never show fixation cross")
+	fixationAlways := flag.Bool("fixation-always", cfg.FixationMode == 2, "Show fixation cross superimposed on stimuli")
+	fullscreen := flag.Bool("fullscreen", cfg.WindowMode == 2, "Enable exclusive fullscreen")
 	fullscreenDesktop := flag.Bool("fullscreen-desktop", cfg.WindowMode == 1, "Enable fullscreen desktop (borderless)")
-	vrr         := flag.Bool("vrr", cfg.VRR, "Enable Variable Refresh Rate mode (disables VSync)")
-	bgColorStr  := flag.String("bg-color", fmt.Sprintf("%d,%d,%d,%d", cfg.BGColor.R, cfg.BGColor.G, cfg.BGColor.B, cfg.BGColor.A), "Background color (R,G,B,A)")
+	vrr := flag.Bool("vrr", cfg.VRR, "Enable Variable Refresh Rate mode (disables VSync)")
+	bgColorStr := flag.String("bg-color", fmt.Sprintf("%d,%d,%d,%d", cfg.BGColor.R, cfg.BGColor.G, cfg.BGColor.B, cfg.BGColor.A), "Background color (R,G,B,A)")
 	textColorStr := flag.String("text-color", fmt.Sprintf("%d,%d,%d,%d", cfg.TextColor.R, cfg.TextColor.G, cfg.TextColor.B, cfg.TextColor.A), "Text color (R,G,B,A)")
-	fixColorStr  := flag.String("fixation-color", fmt.Sprintf("%d,%d,%d,%d", cfg.FixationColor.R, cfg.FixationColor.G, cfg.FixationColor.B, cfg.FixationColor.A), "Fixation color (R,G,B,A)")
-	skipWait    := flag.Bool("skip-wait", cfg.SkipWait, "Skip 'Press any key to start' message")
+	fixColorStr := flag.String("fixation-color", fmt.Sprintf("%d,%d,%d,%d", cfg.FixationColor.R, cfg.FixationColor.G, cfg.FixationColor.B, cfg.FixationColor.A), "Fixation color (R,G,B,A)")
+	skipWait := flag.Bool("skip-wait", cfg.SkipWait, "Skip 'Press any key to start' message")
 
 	flag.Parse()
 

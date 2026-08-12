@@ -267,10 +267,10 @@ type experimentState struct {
 	stNS uint64 // Start time in NS
 	ctNS uint64 // Current time in NS relative to start
 
-	csIndex      int    // Current stimulus index
-	activeVisual int    // Active visual stimulus index (-1 if none)
+	csIndex       int    // Current stimulus index
+	activeVisual  int    // Active visual stimulus index (-1 if none)
 	visualStartNS uint64 // Start time for active visual stimulus in NS
-	visualEndNS  uint64 // End time for active visual stimulus in NS
+	visualEndNS   uint64 // End time for active visual stimulus in NS
 
 	csidxSoundStream int    // Current sound index in a sound stream
 	csvetSoundNS     uint64 // Next sound onset time in a sound stream in NS
@@ -338,7 +338,7 @@ func (s *experimentState) checkStimulusOnset() (bool, int) {
 			if (stim.Type == StimVideo && s.resources[s.csIndex].Video != nil) || len(s.resources[s.csIndex].Textures) > 0 {
 				s.activeVisual = s.csIndex
 				s.visualStartNS = s.ctNS
-				
+
 				durMS := stim.TotalDuration()
 				if stim.Type == StimVideo && durMS <= 1 {
 					v := s.resources[s.csIndex].Video
@@ -622,4 +622,3 @@ func RunExperiment(cfg *Config, exp *Experiment, resources []Resource, renderer 
 
 	return !state.aborted
 }
-

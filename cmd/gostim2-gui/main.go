@@ -27,11 +27,11 @@ import (
 	"gostim2/engine"
 	"gostim2/internal/version"
 
-	"github.com/Zyko0/go-sdl3/sdl"
-	"github.com/Zyko0/go-sdl3/ttf"
 	"github.com/Zyko0/go-sdl3/bin/binimg"
 	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/bin/binttf"
+	"github.com/Zyko0/go-sdl3/sdl"
+	"github.com/Zyko0/go-sdl3/ttf"
 )
 
 func init() {
@@ -84,7 +84,7 @@ func main() {
 				fmt.Printf("Error: %v\n", err)
 				engine.ShowErrorDialog(err.Error())
 			}
-			} else {
+		} else {
 			break
 		}
 	}

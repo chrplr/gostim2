@@ -40,7 +40,7 @@ type Config struct {
 	ScaleFactor   float32   `toml:"scale"`
 	TotalDuration uint64    `toml:"total_duration"`
 	FixationMode  int       `toml:"fixation_mode"` // 0=never, 1=blank screens only, 2=always (superimposed)
-	WindowMode    int       `toml:"window_mode"` // 0=windowed, 1=fullscreen desktop, 2=fullscreen exclusive
+	WindowMode    int       `toml:"window_mode"`   // 0=windowed, 1=fullscreen desktop, 2=fullscreen exclusive
 	AutodetectRes bool      `toml:"autodetect_res"`
 	SkipWait      bool      `toml:"skip_wait"`
 	VSync         bool      `toml:"vsync"`
