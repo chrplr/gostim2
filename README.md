@@ -178,7 +178,7 @@ Do this only if you want to compile the project on your computer. This is the wa
 - **SDL3 libraries**: 
   - **Windows**: DLLs are typically bundled with releases.
   - **macOS**: `brew install sdl3 sdl3_image sdl3_ttf`
-  - **Linux**: Install `sdl3`, `sdl3_image`, and `sdl3_ttf` via your package manager (e.g., `apt install libsdl3-0 libsdl3-image-0 libsdl3-ttf-0`).
+  - **Linux**: Good news, `sdl3`, `sdl3_image`, and `sdl3_ttf` are pre-bundled with Go.
 
 
 To see all available build targets:
@@ -221,6 +221,9 @@ make clean
 To run `gostim2` or `gostim2-gui` from any terminal window without typing their full path, you can move them to a "global" location on your computer.
 
 ##### Linux & macOS
+> [!NOTE]
+> On Linux, if you installed the `.deb` package, this step is usually not needed: `gostim2` and `gostim2-gui` should already be available in the terminal by default.
+
 1. Open a terminal in the folder where your binaries are located.
 2. Move the files to a standard system folder (you will be asked for your password):
    ```bash
